@@ -10,6 +10,11 @@ import Crypto from "crypto";
 import JWT from "jsonwebtoken";
 
 const SIG_FILE: string = "signature.json";
+//const FILE_UPDATE_NAME_REGEX: RegExp =
+//new RegExp("^(.*)(?<ver>\(sig-update-\d\))(.*)$");
+
+const FILE_UPDATE_NAME_REGEX: RegExp =
+  new RegExp(/^(?<name>.*)(?<ver>\(sig-update-(?<verNumber>\d)\))(?<extension>.*)$/);
 
 /*
 * TODOs:
@@ -136,22 +141,42 @@ export class FileJsig {
 
     const jwts: Map<number, string> = signatures.getSignatures();
 
-    // 2) Generate checksum from the updated file
+    // 2) Check if there are any signatures
+    if (jwts.size == 0)
+      throw new VerificationException("No signatures found!");
+
+    // 3) Generate checksum from the updated file
     const checksum: string = Crypto.createHash(digestAlgorithm || "sha256")
       .update(updatedFile)
       .digest("hex").toString();
 
-    // 3) Create file name with the new checksum
-    const firstJwtDecoded: any = JWT.decode(jwts.get(0));
-    const filename: string = firstJwtDecoded["file"];
+    // 3) Create file name with version update
+    const prevJwtDecoded: any = JWT.decode(jwts.get(jwts.size - 1));
+    const filename: string = prevJwtDecoded["file"];
+    let updatedFilename: string;
 
-    const filenameElements: Array<string> = filename.split(".");
+    // Check whether the filename has a version in it
+    const filnameHasVersion: boolean = FILE_UPDATE_NAME_REGEX.test(filename);
 
-    let updatedFilename: string = Util.format("%s-%s", filenameElements[0], checksum);
+    if (!filnameHasVersion) {
+      const filenameElements: Array<string> = filename.split(".");
 
-    // 4) Add the file extensions
-    for (let i = 1; i < filenameElements.length; i++) {
-      updatedFilename += "." + filenameElements[i];
+      updatedFilename = Util.format("%s(sig-update-%d)", filenameElements[0], 1);
+
+      // 4) Add the file extensions
+      for (let i = 1; i < filenameElements.length; i++) {
+        updatedFilename += "." + filenameElements[i];
+      }
+    } else {
+      const matcher: RegExpExecArray = FILE_UPDATE_NAME_REGEX.exec(filename);
+      const groups: object = matcher.groups;
+
+      const prevVersionNumber: number = groups["verNumber"];
+      const newVersion = Util.format("(sig-update-%d)",
+        Number(prevVersionNumber) + 1);
+
+      updatedFilename = Util.format("%s%s%s", groups["name"], newVersion,
+        groups["extension"]);
     }
 
     // 5) Create the jwt

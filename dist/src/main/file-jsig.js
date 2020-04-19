@@ -47,6 +47,9 @@ var adm_zip_1 = __importDefault(require("adm-zip"));
 var crypto_1 = __importDefault(require("crypto"));
 var jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 var SIG_FILE = "signature.json";
+//const FILE_UPDATE_NAME_REGEX: RegExp =
+//new RegExp("^(.*)(?<ver>\(sig-update-\d\))(.*)$");
+var FILE_UPDATE_NAME_REGEX = new RegExp(/^(?<name>.*)(?<ver>\(sig-update-(?<verNumber>\d)\))(?<extension>.*)$/);
 /*
 * TODOs:
 * 2) External signers
@@ -120,18 +123,33 @@ var FileJsig = /** @class */ (function () {
             throw new exceptions_1.VerificationException("Signature file not found!");
         var signatures = model_1.JSigJWTs.fromJson(sigFileEntry.getData().toString());
         var jwts = signatures.getSignatures();
-        // 2) Generate checksum from the updated file
+        // 2) Check if there are any signatures
+        if (jwts.size == 0)
+            throw new exceptions_1.VerificationException("No signatures found!");
+        // 3) Generate checksum from the updated file
         var checksum = crypto_1.default.createHash(digestAlgorithm || "sha256")
             .update(updatedFile)
             .digest("hex").toString();
-        // 3) Create file name with the new checksum
-        var firstJwtDecoded = jsonwebtoken_1.default.decode(jwts.get(0));
-        var filename = firstJwtDecoded["file"];
-        var filenameElements = filename.split(".");
-        var updatedFilename = util_1.default.format("%s-%s", filenameElements[0], checksum);
-        // 4) Add the file extensions
-        for (var i = 1; i < filenameElements.length; i++) {
-            updatedFilename += "." + filenameElements[i];
+        // 3) Create file name with version update
+        var prevJwtDecoded = jsonwebtoken_1.default.decode(jwts.get(jwts.size - 1));
+        var filename = prevJwtDecoded["file"];
+        var updatedFilename;
+        // Check whether the filename has a version in it
+        var filnameHasVersion = FILE_UPDATE_NAME_REGEX.test(filename);
+        if (!filnameHasVersion) {
+            var filenameElements = filename.split(".");
+            updatedFilename = util_1.default.format("%s(sig-update-%d)", filenameElements[0], 1);
+            // 4) Add the file extensions
+            for (var i = 1; i < filenameElements.length; i++) {
+                updatedFilename += "." + filenameElements[i];
+            }
+        }
+        else {
+            var matcher = FILE_UPDATE_NAME_REGEX.exec(filename);
+            var groups = matcher.groups;
+            var prevVersionNumber = groups["verNumber"];
+            var newVersion = util_1.default.format("(sig-update-%d)", Number(prevVersionNumber) + 1);
+            updatedFilename = util_1.default.format("%s%s%s", groups["name"], newVersion, groups["extension"]);
         }
         // 5) Create the jwt
         var payload = metadata || {};

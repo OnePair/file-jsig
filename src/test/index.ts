@@ -20,6 +20,7 @@ describe("File JSIG tests", () => {
   let signedFile1: Buffer;
   let witnessedFile1: Buffer;
   let witnessedFile2: Buffer;
+  let witnessedFile3: Buffer;
 
   before(async () => {
     const jwkResolver = getResolver();
@@ -85,5 +86,25 @@ describe("File JSIG tests", () => {
       await FileJsig.verify(resolver, witnessedFile2);
     });
   });
+
+  it("Witness file signature with second updated file", () => {
+    assert.doesNotThrow(() => {
+
+      const updatedFile: Buffer =
+        fs.readFileSync(path.join(__dirname, "test-modified-1.pdf"));
+
+      witnessedFile3 = FileJsig.witnessWithFileUpdate(witnessedFile2, updatedFile,
+        jwtSigner2);
+
+      fs.writeFileSync(path.join(__dirname, "signed3.zip"), witnessedFile3);
+    });
+  });
+
+  it("Witnessed file signature with the second updated file should be valid", () => {
+    assert.doesNotThrow(async () => {
+      await FileJsig.verify(resolver, witnessedFile3);
+    });
+  });
+
 
 });

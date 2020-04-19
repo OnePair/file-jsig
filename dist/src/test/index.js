@@ -55,6 +55,7 @@ describe("File JSIG tests", function () {
     var signedFile1;
     var witnessedFile1;
     var witnessedFile2;
+    var witnessedFile3;
     before(function () { return __awaiter(void 0, void 0, void 0, function () {
         var jwkResolver, jwk1, jwk2;
         return __generator(this, function (_a) {
@@ -125,6 +126,25 @@ describe("File JSIG tests", function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0: return [4 /*yield*/, __1.FileJsig.verify(resolver, witnessedFile2)];
+                    case 1:
+                        _a.sent();
+                        return [2 /*return*/];
+                }
+            });
+        }); });
+    });
+    it("Witness file signature with second updated file", function () {
+        chai_1.assert.doesNotThrow(function () {
+            var updatedFile = fs_1.default.readFileSync(path_1.default.join(__dirname, "test-modified-1.pdf"));
+            witnessedFile3 = __1.FileJsig.witnessWithFileUpdate(witnessedFile2, updatedFile, jwtSigner2);
+            fs_1.default.writeFileSync(path_1.default.join(__dirname, "signed3.zip"), witnessedFile3);
+        });
+    });
+    it("Witnessed file signature with the second updated file should be valid", function () {
+        chai_1.assert.doesNotThrow(function () { return __awaiter(void 0, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, __1.FileJsig.verify(resolver, witnessedFile3)];
                     case 1:
                         _a.sent();
                         return [2 /*return*/];
