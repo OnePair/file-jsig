@@ -46,7 +46,7 @@ var util_1 = __importDefault(require("util"));
 var adm_zip_1 = __importDefault(require("adm-zip"));
 var crypto_1 = __importDefault(require("crypto"));
 var jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
-var SIG_FILE = "signature.jwts";
+var SIG_FILE = "signature.json";
 /*
 * TODOs:
 * 2) External signers

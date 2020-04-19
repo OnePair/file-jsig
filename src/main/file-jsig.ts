@@ -9,7 +9,7 @@ import AdmZip from "adm-zip";
 import Crypto from "crypto";
 import JWT from "jsonwebtoken";
 
-const SIG_FILE: string = "signature.jwts";
+const SIG_FILE: string = "signature.json";
 
 /*
 * TODOs:
