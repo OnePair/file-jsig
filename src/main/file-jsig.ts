@@ -10,16 +10,9 @@ import Crypto from "crypto";
 import JWT from "jsonwebtoken";
 
 const SIG_FILE: string = "signature.json";
-//const FILE_UPDATE_NAME_REGEX: RegExp =
-//new RegExp("^(.*)(?<ver>\(sig-update-\d\))(.*)$");
 
 const FILE_UPDATE_NAME_REGEX: RegExp =
   new RegExp(/^(?<name>.*)(?<ver>\(sig-update-(?<verNumber>\d)\))(?<extension>.*)$/);
-
-/*
-* TODOs:
-* 2) External signers
-*/
 
 export class FileJsig {
 

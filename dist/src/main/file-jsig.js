@@ -47,13 +47,7 @@ var adm_zip_1 = __importDefault(require("adm-zip"));
 var crypto_1 = __importDefault(require("crypto"));
 var jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 var SIG_FILE = "signature.json";
-//const FILE_UPDATE_NAME_REGEX: RegExp =
-//new RegExp("^(.*)(?<ver>\(sig-update-\d\))(.*)$");
 var FILE_UPDATE_NAME_REGEX = new RegExp(/^(?<name>.*)(?<ver>\(sig-update-(?<verNumber>\d)\))(?<extension>.*)$/);
-/*
-* TODOs:
-* 2) External signers
-*/
 var FileJsig = /** @class */ (function () {
     function FileJsig() {
     }

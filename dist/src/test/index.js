@@ -73,8 +73,16 @@ describe("File JSIG tests", function () {
                     jwk2 = _a.sent();
                     did1 = new node_did_jwk_1.DidJwk(jwk1);
                     did2 = new node_did_jwk_1.DidJwk(jwk2);
-                    jwtSigner1 = new __1.NodeJwtSigner(jwk1, { issuer: did1.getDidUri(), algorithm: "ES256" });
-                    jwtSigner2 = new __1.NodeJwtSigner(jwk2, { issuer: did2.getDidUri(), algorithm: "ES256" });
+                    jwtSigner1 = new __1.NodeJoseJwtSigner(jwk1, {
+                        issuer: did1.getDidUri(),
+                        algorithm: "ES256",
+                        keyid: "keys-1"
+                    });
+                    jwtSigner2 = new __1.NodeJoseJwtSigner(jwk2, {
+                        issuer: did2.getDidUri(),
+                        algorithm: "ES256",
+                        keyid: "keys-1"
+                    });
                     return [2 /*return*/];
             }
         });

@@ -1,20 +1,23 @@
 import { JwtSigner } from "../jwt-signer";
 import { JWK } from "node-jose";
-import { DIDJwt } from "did-jwt";
+import { DIDJwt, NodeJwtSigner } from "did-jwt";
+
 
 import JWT from "jsonwebtoken";
 
-export class NodeJwtSigner implements JwtSigner {
+export class NodeJoseJwtSigner implements JwtSigner {
 
-  private key: JWK.Key;
-  private options: JWT.SignOptions;
+  //private key: JWK.Key;
+  //private options: JWT.SignOptions;
+  private signer: NodeJwtSigner;
 
   constructor(key: JWK.Key, options?: JWT.SignOptions) {
-    this.key = key;
-    this.options = options || {};
+    this.signer = new NodeJwtSigner(key, options);
+    //this.key = key;
+    //this.options = options || {};
   }
 
   sign(payload: object): string {
-    return DIDJwt.sign(payload, this.key, this.options);
+    return DIDJwt.sign(payload, this.signer);
   }
 }

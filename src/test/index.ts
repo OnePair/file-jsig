@@ -1,5 +1,5 @@
 import { assert } from "chai"
-import { FileJsig, JwtSigner, NodeJwtSigner } from "../";
+import { FileJsig, JwtSigner, NodeJoseJwtSigner } from "../";
 import { DidJwk, getResolver } from "node-did-jwk";
 import { Resolver } from "did-resolver";
 import { JWK } from "node-jose";
@@ -35,8 +35,16 @@ describe("File JSIG tests", () => {
     did1 = new DidJwk(jwk1);
     did2 = new DidJwk(jwk2);
 
-    jwtSigner1 = new NodeJwtSigner(jwk1, { issuer: did1.getDidUri(), algorithm: "ES256" });
-    jwtSigner2 = new NodeJwtSigner(jwk2, { issuer: did2.getDidUri(), algorithm: "ES256" });
+    jwtSigner1 = new NodeJoseJwtSigner(jwk1, {
+      issuer: did1.getDidUri(),
+      algorithm: "ES256",
+      keyid: "keys-1"
+    });
+    jwtSigner2 = new NodeJoseJwtSigner(jwk2, {
+      issuer: did2.getDidUri(),
+      algorithm: "ES256",
+      keyid: "keys-1"
+    });
   });
 
   it("It should sign a file", () => {
