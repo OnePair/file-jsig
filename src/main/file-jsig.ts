@@ -9,7 +9,8 @@ import AdmZip from "adm-zip";
 import Crypto from "crypto";
 import JWT from "jsonwebtoken";
 
-const SIG_FILE: string = "signature.json";
+const SIG_FILE: string = "signature.jsig";
+const JSIG_FILE_VERSION_V_ONE_BETA: string = "0.0.1-beta";
 
 const FILE_UPDATE_NAME_REGEX: RegExp =
   new RegExp(/^(?<name>.*)(?<ver>\(sig-update-(?<verNumber>\d)\))(?<extension>.*)$/);

@@ -1,5 +1,7 @@
 import Crypto from "crypto";
 
+const JSIG_FILE_VERSION_V_ONE_BETA: string = "0.0.1-beta";
+
 export class JSigJWTs {
   private signatures: Map<number, string>;
 
@@ -41,6 +43,8 @@ export class JSigJWTs {
     this.signatures.forEach((value: string, key: number) => {
       jsigJson[key] = value;
     });
+
+    jsigJson["version"] = JSIG_FILE_VERSION_V_ONE_BETA;
 
     return JSON.stringify(jsigJson);
   }
