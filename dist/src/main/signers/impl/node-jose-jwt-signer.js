@@ -4,8 +4,6 @@ var did_jwt_1 = require("did-jwt");
 var NodeJoseJwtSigner = /** @class */ (function () {
     function NodeJoseJwtSigner(key, options) {
         this.signer = new did_jwt_1.NodeJwtSigner(key, options);
-        //this.key = key;
-        //this.options = options || {};
     }
     NodeJoseJwtSigner.prototype.sign = function (payload) {
         return did_jwt_1.DIDJwt.sign(payload, this.signer);

@@ -4,6 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var crypto_1 = __importDefault(require("crypto"));
+var JSIG_FILE_VERSION_V_ONE_BETA = "0.0.1-beta";
 var JSigJWTs = /** @class */ (function () {
     function JSigJWTs(signatures) {
         this.signatures = signatures || new Map();
@@ -35,6 +36,7 @@ var JSigJWTs = /** @class */ (function () {
         this.signatures.forEach(function (value, key) {
             jsigJson[key] = value;
         });
+        jsigJson["version"] = JSIG_FILE_VERSION_V_ONE_BETA;
         return JSON.stringify(jsigJson);
     };
     JSigJWTs.fromJson = function (jsonStr) {
