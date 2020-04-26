@@ -165,7 +165,7 @@ var FileJsig = /** @class */ (function () {
             var _this = this;
             return __generator(this, function (_a) {
                 return [2 /*return*/, new Promise(function (onSuccess, onError) { return __awaiter(_this, void 0, void 0, function () {
-                        var zip_1, sigFileEntry, signatures, jwts_1, jwtIndexes, signers_1;
+                        var zip_1, sigFileEntry, signatures, jwts_1, jwtIndexes, sigs_1;
                         var _this = this;
                         return __generator(this, function (_a) {
                             try {
@@ -179,7 +179,7 @@ var FileJsig = /** @class */ (function () {
                                 // 2) Check if there are any signatures
                                 if (jwts_1.size == 0)
                                     throw new exceptions_1.VerificationException("No signatures found!");
-                                signers_1 = new Map();
+                                sigs_1 = new Map();
                                 // Verify the signatures
                                 jwtIndexes.forEach(function (jwtIndex) { return __awaiter(_this, void 0, void 0, function () {
                                     var jwt, decodedJwt, issuerDID, filename, fileEntry, file, digestAlgorithm, fileChecksum, verifiedDecodedJwt, prevJwt, prevHash;
@@ -216,12 +216,12 @@ var FileJsig = /** @class */ (function () {
                                                         throw new exceptions_1.VerificationException("The previous signature hash " +
                                                             "found in the signature is incorrect!");
                                                 }
-                                                signers_1.set(jwtIndex, verifiedDecodedJwt["iss"]);
+                                                sigs_1.set(jwtIndex, verifiedDecodedJwt["iss"]);
                                                 return [2 /*return*/];
                                         }
                                     });
                                 }); });
-                                onSuccess({ "signers": signers_1 });
+                                onSuccess({ "signatures": sigs_1 });
                             }
                             catch (err) {
                                 onError(err);
