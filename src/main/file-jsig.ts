@@ -214,7 +214,8 @@ export class FileJsig {
         if (jwts.size == 0)
           throw new VerificationException("No signatures found!");
 
-        const sigs: Map<number, string> = new Map<number, string>();
+        //const sigs: Map<number, string> = new Map<number, string>();
+        const sigs: object = {};
 
         // Verify the signatures
         jwtIndexes.forEach(async (jwtIndex: number) => {
@@ -262,7 +263,7 @@ export class FileJsig {
                 "found in the signature is incorrect!");
           }
 
-          sigs.set(jwtIndex, verifiedDecodedJwt["iss"]);
+          sigs[jwtIndex] = verifiedDecodedJwt["iss"];
         });
 
         onSuccess({ "signatures": sigs });

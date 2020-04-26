@@ -179,7 +179,7 @@ var FileJsig = /** @class */ (function () {
                                 // 2) Check if there are any signatures
                                 if (jwts_1.size == 0)
                                     throw new exceptions_1.VerificationException("No signatures found!");
-                                sigs_1 = new Map();
+                                sigs_1 = {};
                                 // Verify the signatures
                                 jwtIndexes.forEach(function (jwtIndex) { return __awaiter(_this, void 0, void 0, function () {
                                     var jwt, decodedJwt, issuerDID, filename, fileEntry, file, digestAlgorithm, fileChecksum, verifiedDecodedJwt, prevJwt, prevHash;
@@ -216,7 +216,7 @@ var FileJsig = /** @class */ (function () {
                                                         throw new exceptions_1.VerificationException("The previous signature hash " +
                                                             "found in the signature is incorrect!");
                                                 }
-                                                sigs_1.set(jwtIndex, verifiedDecodedJwt["iss"]);
+                                                sigs_1[jwtIndex] = verifiedDecodedJwt["iss"];
                                                 return [2 /*return*/];
                                         }
                                     });
