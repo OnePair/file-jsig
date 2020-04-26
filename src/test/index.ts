@@ -72,7 +72,7 @@ describe("File JSIG tests", () => {
 
   it("Witnessed file signature should be valid", () => {
     assert.doesNotThrow(async () => {
-      await FileJsig.verify(resolver, witnessedFile1);
+      const results = await FileJsig.verify(resolver, witnessedFile1);
     });
   });
 

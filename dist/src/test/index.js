@@ -112,11 +112,12 @@ describe("File JSIG tests", function () {
     });
     it("Witnessed file signature should be valid", function () {
         chai_1.assert.doesNotThrow(function () { return __awaiter(void 0, void 0, void 0, function () {
+            var results;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0: return [4 /*yield*/, __1.FileJsig.verify(resolver, witnessedFile1)];
                     case 1:
-                        _a.sent();
+                        results = _a.sent();
                         return [2 /*return*/];
                 }
             });
