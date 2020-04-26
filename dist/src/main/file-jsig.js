@@ -217,7 +217,7 @@ var FileJsig = /** @class */ (function () {
                                                         throw new exceptions_1.VerificationException("The previous signature hash " +
                                                             "found in the signature is incorrect!");
                                                 }
-                                                sigs_1.set(jwtIndex, verifiedDecodedJwt["iss"]);
+                                                sigs_1.set(jwtIndex, jwt);
                                                 if ((jwtIndex + 1) == jwtIndexes_1.length) {
                                                     onSuccess({ "signatures": sigs_1 });
                                                 }

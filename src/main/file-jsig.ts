@@ -263,7 +263,7 @@ export class FileJsig {
                 "found in the signature is incorrect!");
           }
 
-          sigs.set(jwtIndex, verifiedDecodedJwt["iss"]);
+          sigs.set(jwtIndex, jwt);
 
           if ((jwtIndex + 1) == jwtIndexes.length) {
             onSuccess({ "signatures": sigs })
