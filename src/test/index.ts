@@ -48,7 +48,7 @@ describe("File JSIG tests", () => {
   });
 
   it("It should sign a file", () => {
-    let data: Buffer = fs.readFileSync(path.join(__dirname, "test.pdf"));
+    let data: Buffer = fs.readFileSync(path.join(__dirname, "resources/test.pdf"));
 
     signedFile1 = FileJsig.signFile(data, "test.pdf",
       jwtSigner1, { name: "This is the name of the issuer" });
@@ -66,7 +66,7 @@ describe("File JSIG tests", () => {
     assert.doesNotThrow(() => {
       witnessedFile1 = FileJsig.witness(signedFile1, jwtSigner2);
 
-      fs.writeFileSync(path.join(__dirname, "signed.zip"), witnessedFile1);
+      fs.writeFileSync(path.join(__dirname, "resources/signed.zip"), witnessedFile1);
     });
   })
 
@@ -80,12 +80,12 @@ describe("File JSIG tests", () => {
     assert.doesNotThrow(() => {
 
       const updatedFile: Buffer =
-        fs.readFileSync(path.join(__dirname, "test-modified.pdf"));
+        fs.readFileSync(path.join(__dirname, "resources/test-modified.pdf"));
 
       witnessedFile2 = FileJsig.witnessWithFileUpdate(witnessedFile1, updatedFile,
         jwtSigner2);
 
-      fs.writeFileSync(path.join(__dirname, "signed2.zip"), witnessedFile2);
+      fs.writeFileSync(path.join(__dirname, "resources/signed2.zip"), witnessedFile2);
     });
   });
 
@@ -99,12 +99,12 @@ describe("File JSIG tests", () => {
     assert.doesNotThrow(() => {
 
       const updatedFile: Buffer =
-        fs.readFileSync(path.join(__dirname, "test-modified-1.pdf"));
+        fs.readFileSync(path.join(__dirname, "resources/test-modified-1.pdf"));
 
       witnessedFile3 = FileJsig.witnessWithFileUpdate(witnessedFile2, updatedFile,
         jwtSigner2);
 
-      fs.writeFileSync(path.join(__dirname, "signed3.zip"), witnessedFile3);
+      fs.writeFileSync(path.join(__dirname, "resources/signed3.zip"), witnessedFile3);
     });
   });
 
@@ -113,6 +113,4 @@ describe("File JSIG tests", () => {
       await FileJsig.verify(resolver, witnessedFile3);
     });
   });
-
-
 });
