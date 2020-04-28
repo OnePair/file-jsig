@@ -44,6 +44,7 @@ var __1 = require("../");
 var node_did_jwk_1 = require("node-did-jwk");
 var did_resolver_1 = require("did-resolver");
 var node_jose_1 = require("node-jose");
+var did_jwt_1 = require("did-jwt");
 var fs_1 = __importDefault(require("fs"));
 var path_1 = __importDefault(require("path"));
 describe("File JSIG tests", function () {
@@ -73,23 +74,27 @@ describe("File JSIG tests", function () {
                     jwk2 = _a.sent();
                     did1 = new node_did_jwk_1.DidJwk(jwk1);
                     did2 = new node_did_jwk_1.DidJwk(jwk2);
-                    jwtSigner1 = new __1.NodeJoseJwtSigner(jwk1, {
-                        issuer: did1.getDidUri(),
-                        algorithm: "ES256",
-                        keyid: "keys-1"
-                    });
-                    jwtSigner2 = new __1.NodeJoseJwtSigner(jwk2, {
-                        issuer: did2.getDidUri(),
-                        algorithm: "ES256",
-                        keyid: "keys-1"
-                    });
+                    jwtSigner1 = new did_jwt_1.NodeJwtSigner(jwk1 /*, {
+                      issuer: did1.getDidUri(),
+                      algorithm: "ES256",
+                      keyid: "keys-1"
+                    }*/);
+                    jwtSigner2 = new did_jwt_1.NodeJwtSigner(jwk2 /*, {
+                      issuer: did2.getDidUri(),
+                      algorithm: "ES256",
+                      keyid: "keys-1"
+                    }*/);
                     return [2 /*return*/];
             }
         });
     }); });
     it("It should sign a file", function () {
-        var data = fs_1.default.readFileSync(path_1.default.join(__dirname, "test.pdf"));
-        signedFile1 = __1.FileJsig.signFile(data, "test.pdf", jwtSigner1, { name: "This is the name of the issuer" });
+        var data = fs_1.default.readFileSync(path_1.default.join(__dirname, "resources/test.pdf"));
+        signedFile1 = __1.FileJsig.signFile(data, "test.pdf", jwtSigner1, {
+            issuer: did1.getDidUri(),
+            algorithm: "ES256",
+            keyid: "keys-1"
+        }, { name: "This is the name of the issuer" });
         chai_1.assert.isNotNull("");
     });
     it("File signature should be valid", function () {
@@ -106,8 +111,12 @@ describe("File JSIG tests", function () {
     });
     it("Should witness the signed file", function () {
         chai_1.assert.doesNotThrow(function () {
-            witnessedFile1 = __1.FileJsig.witness(signedFile1, jwtSigner2);
-            fs_1.default.writeFileSync(path_1.default.join(__dirname, "signed.zip"), witnessedFile1);
+            witnessedFile1 = __1.FileJsig.witness(signedFile1, jwtSigner2, {
+                issuer: did2.getDidUri(),
+                algorithm: "ES256",
+                keyid: "keys-1"
+            });
+            fs_1.default.writeFileSync(path_1.default.join(__dirname, "resources/signed.zip"), witnessedFile1);
         });
     });
     it("Witnessed file signature should be valid", function () {
@@ -125,9 +134,13 @@ describe("File JSIG tests", function () {
     });
     it("Witness file signature with updated file", function () {
         chai_1.assert.doesNotThrow(function () {
-            var updatedFile = fs_1.default.readFileSync(path_1.default.join(__dirname, "test-modified.pdf"));
-            witnessedFile2 = __1.FileJsig.witnessWithFileUpdate(witnessedFile1, updatedFile, jwtSigner2);
-            fs_1.default.writeFileSync(path_1.default.join(__dirname, "signed2.zip"), witnessedFile2);
+            var updatedFile = fs_1.default.readFileSync(path_1.default.join(__dirname, "resources/test-modified.pdf"));
+            witnessedFile2 = __1.FileJsig.witnessWithFileUpdate(witnessedFile1, updatedFile, jwtSigner2, {
+                issuer: did2.getDidUri(),
+                algorithm: "ES256",
+                keyid: "keys-1"
+            });
+            fs_1.default.writeFileSync(path_1.default.join(__dirname, "resources/signed2.zip"), witnessedFile2);
         });
     });
     it("Witnessed file signature with updated file should be valid", function () {
@@ -144,9 +157,13 @@ describe("File JSIG tests", function () {
     });
     it("Witness file signature with second updated file", function () {
         chai_1.assert.doesNotThrow(function () {
-            var updatedFile = fs_1.default.readFileSync(path_1.default.join(__dirname, "test-modified-1.pdf"));
-            witnessedFile3 = __1.FileJsig.witnessWithFileUpdate(witnessedFile2, updatedFile, jwtSigner2);
-            fs_1.default.writeFileSync(path_1.default.join(__dirname, "signed3.zip"), witnessedFile3);
+            var updatedFile = fs_1.default.readFileSync(path_1.default.join(__dirname, "resources/test-modified-1.pdf"));
+            witnessedFile3 = __1.FileJsig.witnessWithFileUpdate(witnessedFile2, updatedFile, jwtSigner2, {
+                issuer: did2.getDidUri(),
+                algorithm: "ES256",
+                keyid: "keys-1"
+            });
+            fs_1.default.writeFileSync(path_1.default.join(__dirname, "resources/signed3.zip"), witnessedFile3);
         });
     });
     it("Witnessed file signature with the second updated file should be valid", function () {

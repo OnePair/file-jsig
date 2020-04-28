@@ -51,7 +51,7 @@ var FILE_UPDATE_NAME_REGEX = new RegExp(/^(?<name>.*)(?<ver>\(sig-update-(?<verN
 var FileJsig = /** @class */ (function () {
     function FileJsig() {
     }
-    FileJsig.signFile = function (buffer, filename, signer, metadata, digestAlgorithm) {
+    FileJsig.signFile = function (buffer, filename, signer, signOptions, metadata, digestAlgorithm) {
         // 1) Generate the checksum
         var checksum = crypto_1.default.createHash(digestAlgorithm || "sha256")
             .update(buffer)
@@ -62,7 +62,7 @@ var FileJsig = /** @class */ (function () {
         payload["digest_algorithm"] = digestAlgorithm || "sha256";
         // 2) Create the JWT
         //const jwt: string = DIDJwt.sign(payload, jwk, options);
-        var jwt = signer.sign(payload);
+        var jwt = signer.sign(payload, signOptions);
         var signatures = new model_1.JSigJWTs();
         signatures.addSignature(jwt);
         // 3) Assemble the files in a zip file. File extension should be .<extension>.jsig
@@ -71,7 +71,7 @@ var FileJsig = /** @class */ (function () {
         zip.addFile(SIG_FILE, Buffer.from(signatures.toJson()));
         return zip.toBuffer();
     };
-    FileJsig.witness = function (jsigFile, signer, metadata, digestAlgorithm) {
+    FileJsig.witness = function (jsigFile, signer, signOptions, metadata, digestAlgorithm) {
         var zip = new adm_zip_1.default(jsigFile);
         // 1) Get the jwts
         var sigFileEntry = zip.getEntry(SIG_FILE);
@@ -101,7 +101,7 @@ var FileJsig = /** @class */ (function () {
         payload["prev_sig_hash"] = signatures.getLastSigHash();
         payload["digest_algorithm"] = digestAlgorithm || "sha256";
         //const witnessJwt: string = DIDJwt.sign(payload, jwk, options);
-        var witnessJwt = signer.sign(payload);
+        var witnessJwt = signer.sign(payload, signOptions);
         // 6) Add the signature
         signatures.addSignature(witnessJwt);
         // 7) Updtate the zip file
@@ -109,7 +109,7 @@ var FileJsig = /** @class */ (function () {
         zip.addFile(SIG_FILE, Buffer.from(signatures.toJson()));
         return zip.toBuffer();
     };
-    FileJsig.witnessWithFileUpdate = function (jsigFile, updatedFile, signer, metadata, digestAlgorithm) {
+    FileJsig.witnessWithFileUpdate = function (jsigFile, updatedFile, signer, signOptions, metadata, digestAlgorithm) {
         var zip = new adm_zip_1.default(jsigFile);
         // 1) Get the jwts
         var sigFileEntry = zip.getEntry(SIG_FILE);
@@ -151,7 +151,7 @@ var FileJsig = /** @class */ (function () {
         payload["file_checksum"] = checksum;
         payload["prev_sig_hash"] = signatures.getLastSigHash();
         payload["digest_algorithm"] = digestAlgorithm || "sha256";
-        var witnessJwt = signer.sign(payload);
+        var witnessJwt = signer.sign(payload, signOptions);
         // 6) Add the signature
         signatures.addSignature(witnessJwt);
         // 7) Update the zip

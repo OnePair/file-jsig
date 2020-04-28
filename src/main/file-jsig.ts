@@ -1,8 +1,7 @@
-import { DIDJwt } from "did-jwt";
+import { DIDJwt, JwtSigner } from "did-jwt";
 import { Resolver } from "did-resolver";
 import { VerificationException } from "./exceptions";
 import { JSigJWTs } from "./model";
-import { JwtSigner } from "./signers";
 
 import Util from "util";
 import AdmZip from "adm-zip";
@@ -17,11 +16,13 @@ const FILE_UPDATE_NAME_REGEX: RegExp =
 export class FileJsig {
 
   public static signFile(buffer: Buffer, filename: string, signer: JwtSigner): Buffer
-  public static signFile(buffer: Buffer, filename: string, signer: JwtSigner): Buffer
   public static signFile(buffer: Buffer, filename: string, signer: JwtSigner,
-    metadata?: object): Buffer
+    signOptions?: JWT.SignOptions): Buffer
   public static signFile(buffer: Buffer, filename: string, signer: JwtSigner,
-    metadata?: object, digestAlgorithm?: string): Buffer {
+    signOptions?: JWT.SignOptions, metadata?: object): Buffer
+  public static signFile(buffer: Buffer, filename: string, signer: JwtSigner,
+    signOptions?: JWT.SignOptions, metadata?: object,
+    digestAlgorithm?: string): Buffer {
 
     // 1) Generate the checksum
     const checksum: string = Crypto.createHash(digestAlgorithm || "sha256")
@@ -37,7 +38,7 @@ export class FileJsig {
 
     // 2) Create the JWT
     //const jwt: string = DIDJwt.sign(payload, jwk, options);
-    const jwt: string = signer.sign(payload);
+    const jwt: string = signer.sign(payload, signOptions);
 
     const signatures: JSigJWTs = new JSigJWTs();
     signatures.addSignature(jwt);
@@ -51,10 +52,12 @@ export class FileJsig {
   }
 
   public static witness(jsigFile: Buffer, signer: JwtSigner): Buffer;
-  public static witness(jsigFile: Buffer, signer: JwtSigner): Buffer;
   public static witness(jsigFile: Buffer, signer: JwtSigner,
-    metadata?: object): Buffer;
-  public static witness(jsigFile: Buffer, signer: JwtSigner, metadata?: object,
+    signOptions?: JWT.SignOptions): Buffer;
+  public static witness(jsigFile: Buffer, signer: JwtSigner,
+    signOptions?: JWT.SignOptions, metadata?: object): Buffer;
+  public static witness(jsigFile: Buffer, signer: JwtSigner,
+    signOptions?: JWT.SignOptions, metadata?: object,
     digestAlgorithm?: string): Buffer {
     const zip: AdmZip = new AdmZip(jsigFile);
 
@@ -99,7 +102,7 @@ export class FileJsig {
     payload["digest_algorithm"] = digestAlgorithm || "sha256";
 
     //const witnessJwt: string = DIDJwt.sign(payload, jwk, options);
-    const witnessJwt: string = signer.sign(payload);
+    const witnessJwt: string = signer.sign(payload, signOptions);
 
     // 6) Add the signature
     signatures.addSignature(witnessJwt);
@@ -114,11 +117,13 @@ export class FileJsig {
   public static witnessWithFileUpdate(jsigFile: Buffer, updatedFile: Buffer,
     signer: JwtSigner): Buffer;
   public static witnessWithFileUpdate(jsigFile: Buffer, updatedFile: Buffer,
-    signer: JwtSigner): Buffer;
+    signer: JwtSigner, signOptions?: JWT.SignOptions): Buffer;
   public static witnessWithFileUpdate(jsigFile: Buffer,
-    updatedFile: Buffer, signer: JwtSigner, metadata?: object): Buffer;
+    updatedFile: Buffer, signer: JwtSigner, signOptions?: JWT.SignOptions,
+    metadata?: object): Buffer;
   public static witnessWithFileUpdate(jsigFile: Buffer,
-    updatedFile: Buffer, signer: JwtSigner, metadata?: object,
+    updatedFile: Buffer, signer: JwtSigner, signOptions?: JWT.SignOptions,
+    metadata?: object,
     digestAlgorithm?: string): Buffer {
 
     const zip: AdmZip = new AdmZip(jsigFile);
@@ -180,7 +185,7 @@ export class FileJsig {
     payload["prev_sig_hash"] = signatures.getLastSigHash();
     payload["digest_algorithm"] = digestAlgorithm || "sha256";
 
-    const witnessJwt: string = signer.sign(payload);
+    const witnessJwt: string = signer.sign(payload, signOptions);
 
     // 6) Add the signature
     signatures.addSignature(witnessJwt);
