@@ -74,16 +74,8 @@ describe("File JSIG tests", function () {
                     jwk2 = _a.sent();
                     did1 = new node_did_jwk_1.DidJwk(jwk1);
                     did2 = new node_did_jwk_1.DidJwk(jwk2);
-                    jwtSigner1 = new did_jwt_1.NodeJwtSigner(jwk1 /*, {
-                      issuer: did1.getDidUri(),
-                      algorithm: "ES256",
-                      keyid: "keys-1"
-                    }*/);
-                    jwtSigner2 = new did_jwt_1.NodeJwtSigner(jwk2 /*, {
-                      issuer: did2.getDidUri(),
-                      algorithm: "ES256",
-                      keyid: "keys-1"
-                    }*/);
+                    jwtSigner1 = new did_jwt_1.NodeJwtSigner(jwk1);
+                    jwtSigner2 = new did_jwt_1.NodeJwtSigner(jwk2);
                     return [2 /*return*/];
             }
         });
@@ -95,87 +87,93 @@ describe("File JSIG tests", function () {
             algorithm: "ES256",
             keyid: "keys-1"
         }, { name: "This is the name of the issuer" });
-        chai_1.assert.isNotNull("");
+        chai_1.expect(signedFile1).to.be.a("Uint8Array");
     });
-    it("File signature should be valid", function () {
-        chai_1.assert.doesNotThrow(function () { return __awaiter(void 0, void 0, void 0, function () {
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, __1.FileJsig.verify(resolver, signedFile1)];
-                    case 1:
-                        _a.sent();
-                        return [2 /*return*/];
-                }
-            });
-        }); });
-    });
-    it("Should witness the signed file", function () {
-        chai_1.assert.doesNotThrow(function () {
+    it("File signature should be valid", function () { return __awaiter(void 0, void 0, void 0, function () {
+        var err_1;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    _a.trys.push([0, 2, , 3]);
+                    return [4 /*yield*/, __1.FileJsig.verify(resolver, signedFile1)];
+                case 1:
+                    _a.sent();
+                    chai_1.assert.fail("Verification should of failed!");
+                    return [3 /*break*/, 3];
+                case 2:
+                    err_1 = _a.sent();
+                    chai_1.expect(err_1).to.not.be.a("null");
+                    return [3 /*break*/, 3];
+                case 3: return [2 /*return*/];
+            }
+        });
+    }); });
+    it("Should witness the signed file", function () { return __awaiter(void 0, void 0, void 0, function () {
+        return __generator(this, function (_a) {
             witnessedFile1 = __1.FileJsig.witness(signedFile1, jwtSigner2, {
                 issuer: did2.getDidUri(),
                 algorithm: "ES256",
                 keyid: "keys-1"
             });
             fs_1.default.writeFileSync(path_1.default.join(__dirname, "resources/signed.zip"), witnessedFile1);
+            chai_1.expect(witnessedFile1).to.be.a("Uint8Array");
+            return [2 /*return*/];
         });
-    });
-    it("Witnessed file signature should be valid", function () {
-        chai_1.assert.doesNotThrow(function () { return __awaiter(void 0, void 0, void 0, function () {
-            var results;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, __1.FileJsig.verify(resolver, witnessedFile1)];
-                    case 1:
-                        results = _a.sent();
-                        return [2 /*return*/];
-                }
-            });
-        }); });
-    });
+    }); });
+    it("Witnessed file signature should be valid", function () { return __awaiter(void 0, void 0, void 0, function () {
+        var results;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, __1.FileJsig.verify(resolver, witnessedFile1)];
+                case 1:
+                    results = _a.sent();
+                    chai_1.expect(results).to.be.a("object");
+                    return [2 /*return*/];
+            }
+        });
+    }); });
     it("Witness file signature with updated file", function () {
-        chai_1.assert.doesNotThrow(function () {
-            var updatedFile = fs_1.default.readFileSync(path_1.default.join(__dirname, "resources/test-modified.pdf"));
-            witnessedFile2 = __1.FileJsig.witnessWithFileUpdate(witnessedFile1, updatedFile, jwtSigner2, {
-                issuer: did2.getDidUri(),
-                algorithm: "ES256",
-                keyid: "keys-1"
-            });
-            fs_1.default.writeFileSync(path_1.default.join(__dirname, "resources/signed2.zip"), witnessedFile2);
+        var updatedFile = fs_1.default.readFileSync(path_1.default.join(__dirname, "resources/test-modified.pdf"));
+        witnessedFile2 = __1.FileJsig.witnessWithFileUpdate(witnessedFile1, updatedFile, jwtSigner2, {
+            issuer: did2.getDidUri(),
+            algorithm: "ES256",
+            keyid: "keys-1"
         });
+        fs_1.default.writeFileSync(path_1.default.join(__dirname, "resources/signed2.zip"), witnessedFile2);
+        chai_1.expect(witnessedFile2).to.be.a("Uint8Array");
     });
-    it("Witnessed file signature with updated file should be valid", function () {
-        chai_1.assert.doesNotThrow(function () { return __awaiter(void 0, void 0, void 0, function () {
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, __1.FileJsig.verify(resolver, witnessedFile2)];
-                    case 1:
-                        _a.sent();
-                        return [2 /*return*/];
-                }
-            });
-        }); });
-    });
+    it("Witnessed file signature with updated file should be valid", function () { return __awaiter(void 0, void 0, void 0, function () {
+        var results;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, __1.FileJsig.verify(resolver, witnessedFile2)];
+                case 1:
+                    results = _a.sent();
+                    chai_1.expect(results).to.be.a("object");
+                    return [2 /*return*/];
+            }
+        });
+    }); });
     it("Witness file signature with second updated file", function () {
-        chai_1.assert.doesNotThrow(function () {
-            var updatedFile = fs_1.default.readFileSync(path_1.default.join(__dirname, "resources/test-modified-1.pdf"));
-            witnessedFile3 = __1.FileJsig.witnessWithFileUpdate(witnessedFile2, updatedFile, jwtSigner2, {
-                issuer: did2.getDidUri(),
-                algorithm: "ES256",
-                keyid: "keys-1"
-            });
-            fs_1.default.writeFileSync(path_1.default.join(__dirname, "resources/signed3.zip"), witnessedFile3);
+        var updatedFile = fs_1.default.readFileSync(path_1.default.join(__dirname, "resources/test-modified-1.pdf"));
+        witnessedFile3 = __1.FileJsig.witnessWithFileUpdate(witnessedFile2, updatedFile, jwtSigner2, {
+            issuer: did2.getDidUri(),
+            algorithm: "ES256",
+            keyid: "keys-1"
         });
+        fs_1.default.writeFileSync(path_1.default.join(__dirname, "resources/signed3.zip"), witnessedFile3);
+        chai_1.expect(witnessedFile3).to.be.a("Uint8Array");
     });
-    it("Witnessed file signature with the second updated file should be valid", function () {
-        chai_1.assert.doesNotThrow(function () { return __awaiter(void 0, void 0, void 0, function () {
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, __1.FileJsig.verify(resolver, witnessedFile3)];
-                    case 1:
-                        _a.sent();
-                        return [2 /*return*/];
-                }
-            });
-        }); });
-    });
+    it("Witnessed file signature with the second updated file should be valid", function () { return __awaiter(void 0, void 0, void 0, function () {
+        var results;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, __1.FileJsig.verify(resolver, witnessedFile3)];
+                case 1:
+                    results = _a.sent();
+                    chai_1.expect(results).to.be.a("object");
+                    return [2 /*return*/];
+            }
+        });
+    }); });
 });

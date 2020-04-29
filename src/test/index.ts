@@ -1,4 +1,4 @@
-import { assert } from "chai"
+import { expect, assert } from "chai";
 import { FileJsig } from "../";
 import { DidJwk, getResolver } from "node-did-jwk";
 import { Resolver } from "did-resolver";
@@ -37,17 +37,9 @@ describe("File JSIG tests", () => {
     did1 = new DidJwk(jwk1);
     did2 = new DidJwk(jwk2);
 
-    jwtSigner1 = new NodeJwtSigner(jwk1/*, {
-      issuer: did1.getDidUri(),
-      algorithm: "ES256",
-      keyid: "keys-1"
-    }*/);
+    jwtSigner1 = new NodeJwtSigner(jwk1);
 
-    jwtSigner2 = new NodeJwtSigner(jwk2/*, {
-      issuer: did2.getDidUri(),
-      algorithm: "ES256",
-      keyid: "keys-1"
-    }*/);
+    jwtSigner2 = new NodeJwtSigner(jwk2);
   });
 
   it("It should sign a file", () => {
@@ -60,76 +52,80 @@ describe("File JSIG tests", () => {
         keyid: "keys-1"
       }, { name: "This is the name of the issuer" });
 
-    assert.isNotNull("");
+    expect(signedFile1).to.be.a("Uint8Array");
   });
 
-  it("File signature should be valid", () => {
-    assert.doesNotThrow(async () => {
+  it("File signature should be valid", async () => {
+    try {
       await FileJsig.verify(resolver, signedFile1);
-    });
+      assert.fail("Verification should of failed!");
+    } catch (err) {
+      expect(err).to.not.be.a("null");
+    }
   });
 
-  it("Should witness the signed file", () => {
-    assert.doesNotThrow(() => {
-      witnessedFile1 = FileJsig.witness(signedFile1, jwtSigner2, {
+  it("Should witness the signed file", async () => {
+
+    witnessedFile1 = FileJsig.witness(signedFile1, jwtSigner2, {
+      issuer: did2.getDidUri(),
+      algorithm: "ES256",
+      keyid: "keys-1"
+    });
+
+    fs.writeFileSync(path.join(__dirname, "resources/signed.zip"), witnessedFile1);
+
+    expect(witnessedFile1).to.be.a("Uint8Array");
+  })
+
+  it("Witnessed file signature should be valid", async () => {
+    const results = await FileJsig.verify(resolver, witnessedFile1);
+
+    expect(results).to.be.a("object");
+  });
+
+  it("Witness file signature with updated file", () => {
+    const updatedFile: Buffer =
+      fs.readFileSync(path.join(__dirname, "resources/test-modified.pdf"));
+
+    witnessedFile2 = FileJsig.witnessWithFileUpdate(witnessedFile1, updatedFile,
+      jwtSigner2, {
         issuer: did2.getDidUri(),
         algorithm: "ES256",
         keyid: "keys-1"
       });
 
-      fs.writeFileSync(path.join(__dirname, "resources/signed.zip"), witnessedFile1);
-    });
-  })
+    fs.writeFileSync(path.join(__dirname, "resources/signed2.zip"), witnessedFile2);
 
-  it("Witnessed file signature should be valid", () => {
-    assert.doesNotThrow(async () => {
-      const results = await FileJsig.verify(resolver, witnessedFile1);
-    });
+    expect(witnessedFile2).to.be.a("Uint8Array");
   });
 
-  it("Witness file signature with updated file", () => {
-    assert.doesNotThrow(() => {
+  it("Witnessed file signature with updated file should be valid", async () => {
 
-      const updatedFile: Buffer =
-        fs.readFileSync(path.join(__dirname, "resources/test-modified.pdf"));
+    const results = await FileJsig.verify(resolver, witnessedFile2);
 
-      witnessedFile2 = FileJsig.witnessWithFileUpdate(witnessedFile1, updatedFile,
-        jwtSigner2, {
-          issuer: did2.getDidUri(),
-          algorithm: "ES256",
-          keyid: "keys-1"
-        });
-
-      fs.writeFileSync(path.join(__dirname, "resources/signed2.zip"), witnessedFile2);
-    });
-  });
-
-  it("Witnessed file signature with updated file should be valid", () => {
-    assert.doesNotThrow(async () => {
-      await FileJsig.verify(resolver, witnessedFile2);
-    });
+    expect(results).to.be.a("object");
   });
 
   it("Witness file signature with second updated file", () => {
-    assert.doesNotThrow(() => {
 
-      const updatedFile: Buffer =
-        fs.readFileSync(path.join(__dirname, "resources/test-modified-1.pdf"));
+    const updatedFile: Buffer =
+      fs.readFileSync(path.join(__dirname, "resources/test-modified-1.pdf"));
 
-      witnessedFile3 = FileJsig.witnessWithFileUpdate(witnessedFile2, updatedFile,
-        jwtSigner2, {
-          issuer: did2.getDidUri(),
-          algorithm: "ES256",
-          keyid: "keys-1"
-        });
+    witnessedFile3 = FileJsig.witnessWithFileUpdate(witnessedFile2, updatedFile,
+      jwtSigner2, {
+        issuer: did2.getDidUri(),
+        algorithm: "ES256",
+        keyid: "keys-1"
+      });
 
-      fs.writeFileSync(path.join(__dirname, "resources/signed3.zip"), witnessedFile3);
-    });
+    fs.writeFileSync(path.join(__dirname, "resources/signed3.zip"), witnessedFile3);
+
+    expect(witnessedFile3).to.be.a("Uint8Array");
   });
 
-  it("Witnessed file signature with the second updated file should be valid", () => {
-    assert.doesNotThrow(async () => {
-      await FileJsig.verify(resolver, witnessedFile3);
-    });
+  it("Witnessed file signature with the second updated file should be valid", async () => {
+      const results = await FileJsig.verify(resolver, witnessedFile3);
+
+      expect(results).to.be.a("object");
   });
 });
