@@ -200,83 +200,78 @@ export class FileJsig {
 
   public static async verify(resolver: Resolver, buffer: Buffer):
     Promise<object> {
-    return new Promise<object>(async (onSuccess: Function, onError: Function) => {
-      try {
-        const zip: AdmZip = new AdmZip(buffer);
+    const zip: AdmZip = new AdmZip(buffer);
 
-        // 1) Get the jwts
-        const sigFileEntry: AdmZip.IZipEntry = zip.getEntry(SIG_FILE);
+    // 1) Get the jwts
+    const sigFileEntry: AdmZip.IZipEntry = zip.getEntry(SIG_FILE);
 
-        if (!sigFileEntry)
-          throw new VerificationException("Signature file not found!");
+    if (!sigFileEntry)
+      throw new VerificationException("Signature file not found!");
 
-        const signatures: JSigJWTs =
-          JSigJWTs.fromJson(sigFileEntry.getData().toString());
-        const jwts: Map<number, string> = signatures.getSignatures();
-        const jwtIndexes: Array<number> = Array.from(jwts.keys());
+    const signatures: JSigJWTs =
+      JSigJWTs.fromJson(sigFileEntry.getData().toString());
+    const jwts: Map<number, string> = signatures.getSignatures();
+    const jwtIndexes: Array<number> = Array.from(jwts.keys());
 
-        // 2) Check if there are any signatures
-        if (jwts.size == 0)
-          throw new VerificationException("No signatures found!");
+    // 2) Check if there are any signatures
+    if (jwts.size == 0)
+      throw new VerificationException("No signatures found!");
 
-        const sigs: Map<number, string> = new Map<number, string>();
-        //const sigs: object = {};
+    const sigs: Map<number, string> = new Map<number, string>();
+    //const sigs: object = {};
 
-        // Verify the signatures
-        jwtIndexes.forEach(async (jwtIndex: number) => {
-          const jwt: string = jwts.get(jwtIndex);
-          const decodedJwt: any = JWT.decode(jwt);
-          let issuerDID: string = decodedJwt["iss"];
+    // Verify the signatures
+    const jwtIndexKeys: Array<number> = Array.from(jwts.keys());
 
-          // 1) Generate the file checksum
-          const filename: string = decodedJwt["file"];
-          const fileEntry: AdmZip.IZipEntry = zip.getEntry(filename);
+    for (let index = 0; index < jwtIndexKeys.length; index++) {
 
-          if (!fileEntry)
-            throw new VerificationException("Subject file not found!");
+      const jwtIndex: number = jwtIndexes[index];
 
-          const file: Buffer = fileEntry.getData();
+      const jwt: string = jwts.get(jwtIndex);
+      const decodedJwt: any = JWT.decode(jwt);
+      let issuerDID: string = decodedJwt["iss"];
 
-          const digestAlgorithm: string = decodedJwt["digest_algorithm"];
+      // 1) Generate the file checksum
+      const filename: string = decodedJwt["file"];
+      const fileEntry: AdmZip.IZipEntry = zip.getEntry(filename);
 
+      if (!fileEntry)
+        throw new VerificationException("Subject file not found!");
 
-          const fileChecksum: string = Crypto.createHash(digestAlgorithm || "sha256")
-            .update(file)
-            .digest("hex").toString();
+      const file: Buffer = fileEntry.getData();
 
-          // 2) Verify the jwt
-          const verifiedDecodedJwt: object =
-            await DIDJwt.verify(resolver, jwt, issuerDID);
+      const digestAlgorithm: string = decodedJwt["digest_algorithm"];
 
-          // 3) Verify the checksum
-          if (fileChecksum != verifiedDecodedJwt["file_checksum"])
-            throw new VerificationException("The file checksum found in the" +
-              " signature is incorrect!");
+      const fileChecksum: string = Crypto.createHash(digestAlgorithm || "sha256")
+        .update(file)
+        .digest("hex").toString();
 
-          // 4) Verify the prev hash
+      // 2) Verify the jwt
+      const verifiedDecodedJwt: object =
+        await DIDJwt.verify(resolver, jwt, issuerDID);
 
-          // Get the prev hash
-          if (jwtIndex != 0) {
-            const prevJwt: string = jwts.get(jwtIndex - 1);
+      // 3) Verify the checksum
+      if (fileChecksum != verifiedDecodedJwt["file_checksum"])
+        throw new VerificationException("The file checksum found in the" +
+          " signature is incorrect!");
 
-            const prevHash: string = Crypto.createHash("sha256")
-              .update(Buffer.from(prevJwt))
-              .digest("hex").toString();
+      // 4) Verify the prev hash
 
-            if (prevHash != verifiedDecodedJwt["prev_sig_hash"])
-              throw new VerificationException("The previous signature hash " +
-                "found in the signature is incorrect!");
-          }
+      // Get the prev hash
+      if (jwtIndex != 0) {
+        const prevJwt: string = jwts.get(jwtIndex - 1);
 
-          sigs.set(jwtIndex, jwt);
+        const prevHash: string = Crypto.createHash("sha256")
+          .update(Buffer.from(prevJwt))
+          .digest("hex").toString();
 
-          if ((jwtIndex + 1) == jwtIndexes.length) {
-            onSuccess({ "signatures": sigs })
-          }
-        });
-      } catch (err) {
-        onError(err);
+        if (prevHash != verifiedDecodedJwt["prev_sig_hash"])
+          throw new VerificationException("The previous signature hash " +
+            "found in the signature is incorrect!");
       }
-    });
+      sigs.set(jwtIndex, jwt);
+    }
+    return { "signatures": sigs };
+
   }
 }

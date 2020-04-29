@@ -162,76 +162,64 @@ var FileJsig = /** @class */ (function () {
     };
     FileJsig.verify = function (resolver, buffer) {
         return __awaiter(this, void 0, void 0, function () {
-            var _this = this;
+            var zip, sigFileEntry, signatures, jwts, jwtIndexes, sigs, jwtIndexKeys, index, jwtIndex, jwt, decodedJwt, issuerDID, filename, fileEntry, file, digestAlgorithm, fileChecksum, verifiedDecodedJwt, prevJwt, prevHash;
             return __generator(this, function (_a) {
-                return [2 /*return*/, new Promise(function (onSuccess, onError) { return __awaiter(_this, void 0, void 0, function () {
-                        var zip_1, sigFileEntry, signatures, jwts_1, jwtIndexes_1, sigs_1;
-                        var _this = this;
-                        return __generator(this, function (_a) {
-                            try {
-                                zip_1 = new adm_zip_1.default(buffer);
-                                sigFileEntry = zip_1.getEntry(SIG_FILE);
-                                if (!sigFileEntry)
-                                    throw new exceptions_1.VerificationException("Signature file not found!");
-                                signatures = model_1.JSigJWTs.fromJson(sigFileEntry.getData().toString());
-                                jwts_1 = signatures.getSignatures();
-                                jwtIndexes_1 = Array.from(jwts_1.keys());
-                                // 2) Check if there are any signatures
-                                if (jwts_1.size == 0)
-                                    throw new exceptions_1.VerificationException("No signatures found!");
-                                sigs_1 = new Map();
-                                //const sigs: object = {};
-                                // Verify the signatures
-                                jwtIndexes_1.forEach(function (jwtIndex) { return __awaiter(_this, void 0, void 0, function () {
-                                    var jwt, decodedJwt, issuerDID, filename, fileEntry, file, digestAlgorithm, fileChecksum, verifiedDecodedJwt, prevJwt, prevHash;
-                                    return __generator(this, function (_a) {
-                                        switch (_a.label) {
-                                            case 0:
-                                                jwt = jwts_1.get(jwtIndex);
-                                                decodedJwt = jsonwebtoken_1.default.decode(jwt);
-                                                issuerDID = decodedJwt["iss"];
-                                                filename = decodedJwt["file"];
-                                                fileEntry = zip_1.getEntry(filename);
-                                                if (!fileEntry)
-                                                    throw new exceptions_1.VerificationException("Subject file not found!");
-                                                file = fileEntry.getData();
-                                                digestAlgorithm = decodedJwt["digest_algorithm"];
-                                                fileChecksum = crypto_1.default.createHash(digestAlgorithm || "sha256")
-                                                    .update(file)
-                                                    .digest("hex").toString();
-                                                return [4 /*yield*/, did_jwt_1.DIDJwt.verify(resolver, jwt, issuerDID)];
-                                            case 1:
-                                                verifiedDecodedJwt = _a.sent();
-                                                // 3) Verify the checksum
-                                                if (fileChecksum != verifiedDecodedJwt["file_checksum"])
-                                                    throw new exceptions_1.VerificationException("The file checksum found in the" +
-                                                        " signature is incorrect!");
-                                                // 4) Verify the prev hash
-                                                // Get the prev hash
-                                                if (jwtIndex != 0) {
-                                                    prevJwt = jwts_1.get(jwtIndex - 1);
-                                                    prevHash = crypto_1.default.createHash("sha256")
-                                                        .update(Buffer.from(prevJwt))
-                                                        .digest("hex").toString();
-                                                    if (prevHash != verifiedDecodedJwt["prev_sig_hash"])
-                                                        throw new exceptions_1.VerificationException("The previous signature hash " +
-                                                            "found in the signature is incorrect!");
-                                                }
-                                                sigs_1.set(jwtIndex, jwt);
-                                                if ((jwtIndex + 1) == jwtIndexes_1.length) {
-                                                    onSuccess({ "signatures": sigs_1 });
-                                                }
-                                                return [2 /*return*/];
-                                        }
-                                    });
-                                }); });
-                            }
-                            catch (err) {
-                                onError(err);
-                            }
-                            return [2 /*return*/];
-                        });
-                    }); })];
+                switch (_a.label) {
+                    case 0:
+                        zip = new adm_zip_1.default(buffer);
+                        sigFileEntry = zip.getEntry(SIG_FILE);
+                        if (!sigFileEntry)
+                            throw new exceptions_1.VerificationException("Signature file not found!");
+                        signatures = model_1.JSigJWTs.fromJson(sigFileEntry.getData().toString());
+                        jwts = signatures.getSignatures();
+                        jwtIndexes = Array.from(jwts.keys());
+                        // 2) Check if there are any signatures
+                        if (jwts.size == 0)
+                            throw new exceptions_1.VerificationException("No signatures found!");
+                        sigs = new Map();
+                        jwtIndexKeys = Array.from(jwts.keys());
+                        index = 0;
+                        _a.label = 1;
+                    case 1:
+                        if (!(index < jwtIndexKeys.length)) return [3 /*break*/, 4];
+                        jwtIndex = jwtIndexes[index];
+                        jwt = jwts.get(jwtIndex);
+                        decodedJwt = jsonwebtoken_1.default.decode(jwt);
+                        issuerDID = decodedJwt["iss"];
+                        filename = decodedJwt["file"];
+                        fileEntry = zip.getEntry(filename);
+                        if (!fileEntry)
+                            throw new exceptions_1.VerificationException("Subject file not found!");
+                        file = fileEntry.getData();
+                        digestAlgorithm = decodedJwt["digest_algorithm"];
+                        fileChecksum = crypto_1.default.createHash(digestAlgorithm || "sha256")
+                            .update(file)
+                            .digest("hex").toString();
+                        return [4 /*yield*/, did_jwt_1.DIDJwt.verify(resolver, jwt, issuerDID)];
+                    case 2:
+                        verifiedDecodedJwt = _a.sent();
+                        // 3) Verify the checksum
+                        if (fileChecksum != verifiedDecodedJwt["file_checksum"])
+                            throw new exceptions_1.VerificationException("The file checksum found in the" +
+                                " signature is incorrect!");
+                        // 4) Verify the prev hash
+                        // Get the prev hash
+                        if (jwtIndex != 0) {
+                            prevJwt = jwts.get(jwtIndex - 1);
+                            prevHash = crypto_1.default.createHash("sha256")
+                                .update(Buffer.from(prevJwt))
+                                .digest("hex").toString();
+                            if (prevHash != verifiedDecodedJwt["prev_sig_hash"])
+                                throw new exceptions_1.VerificationException("The previous signature hash " +
+                                    "found in the signature is incorrect!");
+                        }
+                        sigs.set(jwtIndex, jwt);
+                        _a.label = 3;
+                    case 3:
+                        index++;
+                        return [3 /*break*/, 1];
+                    case 4: return [2 /*return*/, { "signatures": sigs }];
+                }
             });
         });
     };

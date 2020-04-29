@@ -66,10 +66,10 @@ describe("File JSIG tests", function () {
                     resolver = new did_resolver_1.Resolver({
                         jwk: jwkResolver
                     });
-                    return [4 /*yield*/, node_jose_1.JWK.createKey("EC", "P-256", { alg: "ES256" })];
+                    return [4 /*yield*/, node_jose_1.JWK.asKey(fs_1.default.readFileSync(path_1.default.join(__dirname, "resources/keys/jwk1.json")))];
                 case 1:
                     jwk1 = _a.sent();
-                    return [4 /*yield*/, node_jose_1.JWK.createKey("EC", "P-256", { alg: "ES256" })];
+                    return [4 /*yield*/, node_jose_1.JWK.asKey(fs_1.default.readFileSync(path_1.default.join(__dirname, "resources/keys/jwk2.json")))];
                 case 2:
                     jwk2 = _a.sent();
                     did1 = new node_did_jwk_1.DidJwk(jwk1);
@@ -80,7 +80,7 @@ describe("File JSIG tests", function () {
             }
         });
     }); });
-    it("It should sign a file", function () {
+    it("It should sign a file without an exception", function () {
         var data = fs_1.default.readFileSync(path_1.default.join(__dirname, "resources/test.pdf"));
         signedFile1 = __1.FileJsig.signFile(data, "test.pdf", jwtSigner1, {
             issuer: did1.getDidUri(),
@@ -90,32 +90,25 @@ describe("File JSIG tests", function () {
         chai_1.expect(signedFile1).to.be.a("Uint8Array");
     });
     it("File signature should be valid", function () { return __awaiter(void 0, void 0, void 0, function () {
-        var err_1;
+        var results;
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0:
-                    _a.trys.push([0, 2, , 3]);
-                    return [4 /*yield*/, __1.FileJsig.verify(resolver, signedFile1)];
+                case 0: return [4 /*yield*/, __1.FileJsig.verify(resolver, signedFile1)];
                 case 1:
-                    _a.sent();
-                    chai_1.assert.fail("Verification should of failed!");
-                    return [3 /*break*/, 3];
-                case 2:
-                    err_1 = _a.sent();
-                    chai_1.expect(err_1).to.not.be.a("null");
-                    return [3 /*break*/, 3];
-                case 3: return [2 /*return*/];
+                    results = _a.sent();
+                    chai_1.expect(results).to.be.a("object");
+                    return [2 /*return*/];
             }
         });
     }); });
-    it("Should witness the signed file", function () { return __awaiter(void 0, void 0, void 0, function () {
+    it("Should witness the signed file without throwing an exception", function () { return __awaiter(void 0, void 0, void 0, function () {
         return __generator(this, function (_a) {
             witnessedFile1 = __1.FileJsig.witness(signedFile1, jwtSigner2, {
                 issuer: did2.getDidUri(),
                 algorithm: "ES256",
                 keyid: "keys-1"
             });
-            fs_1.default.writeFileSync(path_1.default.join(__dirname, "resources/signed.zip"), witnessedFile1);
+            fs_1.default.writeFileSync(path_1.default.join(__dirname, "resources/output/signed.zip"), witnessedFile1);
             chai_1.expect(witnessedFile1).to.be.a("Uint8Array");
             return [2 /*return*/];
         });
@@ -132,14 +125,14 @@ describe("File JSIG tests", function () {
             }
         });
     }); });
-    it("Witness file signature with updated file", function () {
+    it("Witness file signature with updated file without throwing an exception", function () {
         var updatedFile = fs_1.default.readFileSync(path_1.default.join(__dirname, "resources/test-modified.pdf"));
         witnessedFile2 = __1.FileJsig.witnessWithFileUpdate(witnessedFile1, updatedFile, jwtSigner2, {
             issuer: did2.getDidUri(),
             algorithm: "ES256",
             keyid: "keys-1"
         });
-        fs_1.default.writeFileSync(path_1.default.join(__dirname, "resources/signed2.zip"), witnessedFile2);
+        fs_1.default.writeFileSync(path_1.default.join(__dirname, "resources/output/signed2.zip"), witnessedFile2);
         chai_1.expect(witnessedFile2).to.be.a("Uint8Array");
     });
     it("Witnessed file signature with updated file should be valid", function () { return __awaiter(void 0, void 0, void 0, function () {
@@ -154,14 +147,14 @@ describe("File JSIG tests", function () {
             }
         });
     }); });
-    it("Witness file signature with second updated file", function () {
+    it("Witness file signature with second updated file without throwing an exception", function () {
         var updatedFile = fs_1.default.readFileSync(path_1.default.join(__dirname, "resources/test-modified-1.pdf"));
         witnessedFile3 = __1.FileJsig.witnessWithFileUpdate(witnessedFile2, updatedFile, jwtSigner2, {
             issuer: did2.getDidUri(),
             algorithm: "ES256",
             keyid: "keys-1"
         });
-        fs_1.default.writeFileSync(path_1.default.join(__dirname, "resources/signed3.zip"), witnessedFile3);
+        fs_1.default.writeFileSync(path_1.default.join(__dirname, "resources/output/signed3.zip"), witnessedFile3);
         chai_1.expect(witnessedFile3).to.be.a("Uint8Array");
     });
     it("Witnessed file signature with the second updated file should be valid", function () { return __awaiter(void 0, void 0, void 0, function () {
@@ -172,6 +165,78 @@ describe("File JSIG tests", function () {
                 case 1:
                     results = _a.sent();
                     chai_1.expect(results).to.be.a("object");
+                    return [2 /*return*/];
+            }
+        });
+    }); });
+    it("File signed by wrong issuer should be invalid", function () { return __awaiter(void 0, void 0, void 0, function () {
+        var signedFile, error, err_1;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    signedFile = fs_1.default.readFileSync(path_1.default.join(__dirname, "resources/signed_wrong_first_issuer.zip"));
+                    error = null;
+                    _a.label = 1;
+                case 1:
+                    _a.trys.push([1, 3, , 4]);
+                    return [4 /*yield*/, __1.FileJsig.verify(resolver, signedFile)];
+                case 2:
+                    _a.sent();
+                    return [3 /*break*/, 4];
+                case 3:
+                    err_1 = _a.sent();
+                    error = err_1;
+                    return [3 /*break*/, 4];
+                case 4:
+                    chai_1.expect(error).to.not.be.a("null");
+                    return [2 /*return*/];
+            }
+        });
+    }); });
+    it("File witnessed by wrong issuer should be invalid", function () { return __awaiter(void 0, void 0, void 0, function () {
+        var signedFile, error, err_2;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    signedFile = fs_1.default.readFileSync(path_1.default.join(__dirname, "resources/witnessed_wrong_issuer.zip"));
+                    error = null;
+                    _a.label = 1;
+                case 1:
+                    _a.trys.push([1, 3, , 4]);
+                    return [4 /*yield*/, __1.FileJsig.verify(resolver, signedFile)];
+                case 2:
+                    _a.sent();
+                    return [3 /*break*/, 4];
+                case 3:
+                    err_2 = _a.sent();
+                    error = err_2;
+                    return [3 /*break*/, 4];
+                case 4:
+                    chai_1.expect(error).to.not.be.a("null");
+                    return [2 /*return*/];
+            }
+        });
+    }); });
+    it("File witnessed and updated by wrong issuer should be invalid", function () { return __awaiter(void 0, void 0, void 0, function () {
+        var signedFile, error, err_3;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    signedFile = fs_1.default.readFileSync(path_1.default.join(__dirname, "resources/witnessed_with_update_wrong_issuer.zip"));
+                    error = null;
+                    _a.label = 1;
+                case 1:
+                    _a.trys.push([1, 3, , 4]);
+                    return [4 /*yield*/, __1.FileJsig.verify(resolver, signedFile)];
+                case 2:
+                    _a.sent();
+                    return [3 /*break*/, 4];
+                case 3:
+                    err_3 = _a.sent();
+                    error = err_3;
+                    return [3 /*break*/, 4];
+                case 4:
+                    chai_1.expect(error).to.not.be.a("null");
                     return [2 /*return*/];
             }
         });
