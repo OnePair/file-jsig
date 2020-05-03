@@ -1,4 +1,4 @@
-import Crypto from "crypto";
+import * as Crypto from "crypto";
 
 const JSIG_FILE_VERSION_V_ONE_BETA: string = "0.0.1-beta";
 

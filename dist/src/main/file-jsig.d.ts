@@ -1,7 +1,7 @@
 /// <reference types="node" />
 import { JwtSigner } from "did-jwt";
 import { Resolver } from "did-resolver";
-import JWT from "jsonwebtoken";
+import * as JWT from "jsonwebtoken";
 export declare class FileJsig {
     static signFile(buffer: Buffer, filename: string, signer: JwtSigner): Promise<Buffer>;
     static signFile(buffer: Buffer, filename: string, signer: JwtSigner, signOptions?: JWT.SignOptions): Promise<Buffer>;

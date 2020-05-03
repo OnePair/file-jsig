@@ -11,7 +11,7 @@
     "@types/adm-zip": "^0.4.32",
     "@types/node": "^12.12.7",
     "adm-zip": "^0.4.13",
-    "did-jwt": "git+https://github.com/OnePair/did-jwt.git#a5b990b86155267594b19833678895b183ddee54",
+    "did-jwt": "git+https://github.com/OnePair/did-jwt.git#95c7d2f522aaa89158da7b14d022d93ebcf4f127",
     "inherits": "^2.0.4",
     "node-did-jwk": "git+https://github.com/OnePair/node-did-jwk.git#4677f0a74e23279f11fffae43b2fd7643041381d",
     "node-jose": "^1.1.3",

@@ -3,10 +3,11 @@ import { Resolver } from "did-resolver";
 import { VerificationException } from "./exceptions";
 import { JSigJWTs } from "./model";
 
-import Util from "util";
 import AdmZip from "adm-zip";
-import Crypto from "crypto";
-import JWT from "jsonwebtoken";
+
+import * as Util from "util";
+import * as Crypto from "crypto";
+import * as JWT from "jsonwebtoken";
 
 const SIG_FILE: string = "signature.jsig";
 

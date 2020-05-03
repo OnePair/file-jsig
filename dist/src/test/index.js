@@ -35,8 +35,12 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+    result["default"] = mod;
+    return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var chai_1 = require("chai");
@@ -45,8 +49,8 @@ var node_did_jwk_1 = require("node-did-jwk");
 var did_resolver_1 = require("did-resolver");
 var node_jose_1 = require("node-jose");
 var did_jwt_1 = require("did-jwt");
-var fs_1 = __importDefault(require("fs"));
-var path_1 = __importDefault(require("path"));
+var fs = __importStar(require("fs"));
+var path = __importStar(require("path"));
 describe("File JSIG tests", function () {
     var jwtSigner1;
     var jwtSigner2;
@@ -66,10 +70,10 @@ describe("File JSIG tests", function () {
                     resolver = new did_resolver_1.Resolver({
                         jwk: jwkResolver
                     });
-                    return [4 /*yield*/, node_jose_1.JWK.asKey(fs_1.default.readFileSync(path_1.default.join(__dirname, "resources/keys/jwk1.json")))];
+                    return [4 /*yield*/, node_jose_1.JWK.asKey(fs.readFileSync(path.join(__dirname, "resources/keys/jwk1.json")))];
                 case 1:
                     jwk1 = _a.sent();
-                    return [4 /*yield*/, node_jose_1.JWK.asKey(fs_1.default.readFileSync(path_1.default.join(__dirname, "resources/keys/jwk2.json")))];
+                    return [4 /*yield*/, node_jose_1.JWK.asKey(fs.readFileSync(path.join(__dirname, "resources/keys/jwk2.json")))];
                 case 2:
                     jwk2 = _a.sent();
                     did1 = new node_did_jwk_1.DidJwk(jwk1);
@@ -85,7 +89,7 @@ describe("File JSIG tests", function () {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    data = fs_1.default.readFileSync(path_1.default.join(__dirname, "resources/test.pdf"));
+                    data = fs.readFileSync(path.join(__dirname, "resources/test.pdf"));
                     return [4 /*yield*/, __1.FileJsig.signFile(data, "test.pdf", jwtSigner1, {
                             issuer: did1.getDidUri(),
                             algorithm: "ES256",
@@ -120,7 +124,7 @@ describe("File JSIG tests", function () {
                     })];
                 case 1:
                     witnessedFile1 = _a.sent();
-                    fs_1.default.writeFileSync(path_1.default.join(__dirname, "resources/output/signed.zip"), witnessedFile1);
+                    fs.writeFileSync(path.join(__dirname, "resources/output/signed.zip"), witnessedFile1);
                     chai_1.expect(witnessedFile1).to.be.a("Uint8Array");
                     return [2 /*return*/];
             }
@@ -143,7 +147,7 @@ describe("File JSIG tests", function () {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    updatedFile = fs_1.default.readFileSync(path_1.default.join(__dirname, "resources/test-modified.pdf"));
+                    updatedFile = fs.readFileSync(path.join(__dirname, "resources/test-modified.pdf"));
                     return [4 /*yield*/, __1.FileJsig.witnessWithFileUpdate(witnessedFile1, updatedFile, jwtSigner2, {
                             issuer: did2.getDidUri(),
                             algorithm: "ES256",
@@ -151,7 +155,7 @@ describe("File JSIG tests", function () {
                         })];
                 case 1:
                     witnessedFile2 = _a.sent();
-                    fs_1.default.writeFileSync(path_1.default.join(__dirname, "resources/output/signed2.zip"), witnessedFile2);
+                    fs.writeFileSync(path.join(__dirname, "resources/output/signed2.zip"), witnessedFile2);
                     chai_1.expect(witnessedFile2).to.be.a("Uint8Array");
                     return [2 /*return*/];
             }
@@ -174,7 +178,7 @@ describe("File JSIG tests", function () {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    updatedFile = fs_1.default.readFileSync(path_1.default.join(__dirname, "resources/test-modified-1.pdf"));
+                    updatedFile = fs.readFileSync(path.join(__dirname, "resources/test-modified-1.pdf"));
                     return [4 /*yield*/, __1.FileJsig.witnessWithFileUpdate(witnessedFile2, updatedFile, jwtSigner2, {
                             issuer: did2.getDidUri(),
                             algorithm: "ES256",
@@ -182,7 +186,7 @@ describe("File JSIG tests", function () {
                         })];
                 case 1:
                     witnessedFile3 = _a.sent();
-                    fs_1.default.writeFileSync(path_1.default.join(__dirname, "resources/output/signed3.zip"), witnessedFile3);
+                    fs.writeFileSync(path.join(__dirname, "resources/output/signed3.zip"), witnessedFile3);
                     chai_1.expect(witnessedFile3).to.be.a("Uint8Array");
                     return [2 /*return*/];
             }
@@ -205,7 +209,7 @@ describe("File JSIG tests", function () {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    signedFile = fs_1.default.readFileSync(path_1.default.join(__dirname, "resources/signed_wrong_first_issuer.zip"));
+                    signedFile = fs.readFileSync(path.join(__dirname, "resources/signed_wrong_first_issuer.zip"));
                     error = null;
                     _a.label = 1;
                 case 1:
@@ -229,7 +233,7 @@ describe("File JSIG tests", function () {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    signedFile = fs_1.default.readFileSync(path_1.default.join(__dirname, "resources/witnessed_wrong_issuer.zip"));
+                    signedFile = fs.readFileSync(path.join(__dirname, "resources/witnessed_wrong_issuer.zip"));
                     error = null;
                     _a.label = 1;
                 case 1:
@@ -253,7 +257,7 @@ describe("File JSIG tests", function () {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    signedFile = fs_1.default.readFileSync(path_1.default.join(__dirname, "resources/witnessed_with_update_wrong_issuer.zip"));
+                    signedFile = fs.readFileSync(path.join(__dirname, "resources/witnessed_with_update_wrong_issuer.zip"));
                     error = null;
                     _a.label = 1;
                 case 1:

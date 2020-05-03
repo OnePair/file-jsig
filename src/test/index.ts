@@ -5,8 +5,8 @@ import { Resolver } from "did-resolver";
 import { JWK } from "node-jose";
 import { NodeJwtSigner, JwtSigner } from "did-jwt";
 
-import fs from "fs";
-import path from "path";
+import * as fs from "fs";
+import * as path from "path";
 
 
 describe("File JSIG tests", () => {

@@ -38,14 +38,21 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+    result["default"] = mod;
+    return result;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 var did_jwt_1 = require("did-jwt");
 var exceptions_1 = require("./exceptions");
 var model_1 = require("./model");
-var util_1 = __importDefault(require("util"));
 var adm_zip_1 = __importDefault(require("adm-zip"));
-var crypto_1 = __importDefault(require("crypto"));
-var jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+var Util = __importStar(require("util"));
+var Crypto = __importStar(require("crypto"));
+var JWT = __importStar(require("jsonwebtoken"));
 var SIG_FILE = "signature.jsig";
 var FILE_UPDATE_NAME_REGEX = new RegExp(/^(?<name>.*)(?<ver>\(sig-update-(?<verNumber>\d)\))(?<extension>.*)$/);
 var FileJsig = /** @class */ (function () {
@@ -57,7 +64,7 @@ var FileJsig = /** @class */ (function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        checksum = crypto_1.default.createHash(digestAlgorithm || "sha256")
+                        checksum = Crypto.createHash(digestAlgorithm || "sha256")
                             .update(buffer)
                             .digest("hex").toString();
                         payload = metadata || {};
@@ -92,13 +99,13 @@ var FileJsig = /** @class */ (function () {
                         // 2) Check if there are any signatures
                         if (jwts.size == 0)
                             throw new exceptions_1.VerificationException("No signatures found!");
-                        prevJwtDecoded = jsonwebtoken_1.default.decode(jwts.get(jwts.size - 1));
+                        prevJwtDecoded = JWT.decode(jwts.get(jwts.size - 1));
                         filename = prevJwtDecoded["file"];
                         fileEntry = zip.getEntry(filename);
                         if (!fileEntry)
                             throw new exceptions_1.VerificationException("Subject file not found!");
                         file = fileEntry.getData();
-                        checksum = crypto_1.default.createHash(digestAlgorithm || "sha256")
+                        checksum = Crypto.createHash(digestAlgorithm || "sha256")
                             .update(file)
                             .digest("hex").toString();
                         payload = metadata || {};
@@ -134,15 +141,15 @@ var FileJsig = /** @class */ (function () {
                         // 2) Check if there are any signatures
                         if (jwts.size == 0)
                             throw new exceptions_1.VerificationException("No signatures found!");
-                        checksum = crypto_1.default.createHash(digestAlgorithm || "sha256")
+                        checksum = Crypto.createHash(digestAlgorithm || "sha256")
                             .update(updatedFile)
                             .digest("hex").toString();
-                        prevJwtDecoded = jsonwebtoken_1.default.decode(jwts.get(jwts.size - 1));
+                        prevJwtDecoded = JWT.decode(jwts.get(jwts.size - 1));
                         filename = prevJwtDecoded["file"];
                         filnameHasVersion = FILE_UPDATE_NAME_REGEX.test(filename);
                         if (!filnameHasVersion) {
                             filenameElements = filename.split(".");
-                            updatedFilename = util_1.default.format("%s(sig-update-%d)", filenameElements[0], 1);
+                            updatedFilename = Util.format("%s(sig-update-%d)", filenameElements[0], 1);
                             // 4) Add the file extensions
                             for (i = 1; i < filenameElements.length; i++) {
                                 updatedFilename += "." + filenameElements[i];
@@ -152,8 +159,8 @@ var FileJsig = /** @class */ (function () {
                             matcher = FILE_UPDATE_NAME_REGEX.exec(filename);
                             groups = matcher.groups;
                             prevVersionNumber = groups["verNumber"];
-                            newVersion = util_1.default.format("(sig-update-%d)", Number(prevVersionNumber) + 1);
-                            updatedFilename = util_1.default.format("%s%s%s", groups["name"], newVersion, groups["extension"]);
+                            newVersion = Util.format("(sig-update-%d)", Number(prevVersionNumber) + 1);
+                            updatedFilename = Util.format("%s%s%s", groups["name"], newVersion, groups["extension"]);
                         }
                         payload = metadata || {};
                         payload["file"] = updatedFilename;
@@ -198,7 +205,7 @@ var FileJsig = /** @class */ (function () {
                         if (!(index < jwtIndexKeys.length)) return [3 /*break*/, 4];
                         jwtIndex = jwtIndexes[index];
                         jwt = jwts.get(jwtIndex);
-                        decodedJwt = jsonwebtoken_1.default.decode(jwt);
+                        decodedJwt = JWT.decode(jwt);
                         issuerDID = decodedJwt["iss"];
                         filename = decodedJwt["file"];
                         fileEntry = zip.getEntry(filename);
@@ -206,7 +213,7 @@ var FileJsig = /** @class */ (function () {
                             throw new exceptions_1.VerificationException("Subject file not found!");
                         file = fileEntry.getData();
                         digestAlgorithm = decodedJwt["digest_algorithm"];
-                        fileChecksum = crypto_1.default.createHash(digestAlgorithm || "sha256")
+                        fileChecksum = Crypto.createHash(digestAlgorithm || "sha256")
                             .update(file)
                             .digest("hex").toString();
                         return [4 /*yield*/, did_jwt_1.DIDJwt.verify(resolver, jwt, issuerDID)];
@@ -220,7 +227,7 @@ var FileJsig = /** @class */ (function () {
                         // Get the prev hash
                         if (jwtIndex != 0) {
                             prevJwt = jwts.get(jwtIndex - 1);
-                            prevHash = crypto_1.default.createHash("sha256")
+                            prevHash = Crypto.createHash("sha256")
                                 .update(Buffer.from(prevJwt))
                                 .digest("hex").toString();
                             if (prevHash != verifiedDecodedJwt["prev_sig_hash"])

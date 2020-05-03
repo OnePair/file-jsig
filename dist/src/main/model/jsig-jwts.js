@@ -1,9 +1,13 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+    result["default"] = mod;
+    return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var crypto_1 = __importDefault(require("crypto"));
+var Crypto = __importStar(require("crypto"));
 var JSIG_FILE_VERSION_V_ONE_BETA = "0.0.1-beta";
 var JSigJWTs = /** @class */ (function () {
     function JSigJWTs(signatures) {
@@ -18,7 +22,7 @@ var JSigJWTs = /** @class */ (function () {
             return null;
         var lastSigIndex = Math.max.apply(Math, sigIndexs);
         var lastJwt = this.signatures.get(lastSigIndex);
-        var sigHash = crypto_1.default.createHash("sha256")
+        var sigHash = Crypto.createHash("sha256")
             .update(Buffer.from(lastJwt))
             .digest("hex").toString();
         return sigHash;
