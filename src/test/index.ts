@@ -43,10 +43,10 @@ describe("File JSIG tests", () => {
     jwtSigner2 = new NodeJwtSigner(jwk2);
   });
 
-  it("It should sign a file without an exception", () => {
+  it("It should sign a file without an exception", async () => {
     let data: Buffer = fs.readFileSync(path.join(__dirname, "resources/test.pdf"));
 
-    signedFile1 = FileJsig.signFile(data, "test.pdf",
+    signedFile1 = await FileJsig.signFile(data, "test.pdf",
       jwtSigner1, {
         issuer: did1.getDidUri(),
         algorithm: "ES256",
@@ -63,7 +63,7 @@ describe("File JSIG tests", () => {
   });
 
   it("Should witness the signed file without throwing an exception", async () => {
-    witnessedFile1 = FileJsig.witness(signedFile1, jwtSigner2, {
+    witnessedFile1 = await FileJsig.witness(signedFile1, jwtSigner2, {
       issuer: did2.getDidUri(),
       algorithm: "ES256",
       keyid: "keys-1"
@@ -80,11 +80,11 @@ describe("File JSIG tests", () => {
     expect(results).to.be.a("object");
   });
 
-  it("Witness file signature with updated file without throwing an exception", () => {
+  it("Witness file signature with updated file without throwing an exception", async () => {
     const updatedFile: Buffer =
       fs.readFileSync(path.join(__dirname, "resources/test-modified.pdf"));
 
-    witnessedFile2 = FileJsig.witnessWithFileUpdate(witnessedFile1, updatedFile,
+    witnessedFile2 = await FileJsig.witnessWithFileUpdate(witnessedFile1, updatedFile,
       jwtSigner2, {
         issuer: did2.getDidUri(),
         algorithm: "ES256",
@@ -102,11 +102,11 @@ describe("File JSIG tests", () => {
     expect(results).to.be.a("object");
   });
 
-  it("Witness file signature with second updated file without throwing an exception", () => {
+  it("Witness file signature with second updated file without throwing an exception", async () => {
     const updatedFile: Buffer =
       fs.readFileSync(path.join(__dirname, "resources/test-modified-1.pdf"));
 
-    witnessedFile3 = FileJsig.witnessWithFileUpdate(witnessedFile2, updatedFile,
+    witnessedFile3 = await FileJsig.witnessWithFileUpdate(witnessedFile2, updatedFile,
       jwtSigner2, {
         issuer: did2.getDidUri(),
         algorithm: "ES256",

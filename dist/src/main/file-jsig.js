@@ -52,113 +52,127 @@ var FileJsig = /** @class */ (function () {
     function FileJsig() {
     }
     FileJsig.signFile = function (buffer, filename, signer, signOptions, metadata, digestAlgorithm) {
-        // 1) Generate the checksum
-        var checksum = crypto_1.default.createHash(digestAlgorithm || "sha256")
-            .update(buffer)
-            .digest("hex").toString();
-        var payload = metadata || {};
-        payload["file"] = filename;
-        payload["file_checksum"] = checksum;
-        payload["digest_algorithm"] = digestAlgorithm || "sha256";
-        // 2) Create the JWT
-        //const jwt: string = DIDJwt.sign(payload, jwk, options);
-        var jwt = signer.sign(payload, signOptions);
-        var signatures = new model_1.JSigJWTs();
-        signatures.addSignature(jwt);
-        // 3) Assemble the files in a zip file. File extension should be .<extension>.jsig
-        var zip = new adm_zip_1.default();
-        zip.addFile(filename, buffer);
-        zip.addFile(SIG_FILE, Buffer.from(signatures.toJson()));
-        return zip.toBuffer();
+        return __awaiter(this, void 0, void 0, function () {
+            var checksum, payload, jwt, signatures, zip;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        checksum = crypto_1.default.createHash(digestAlgorithm || "sha256")
+                            .update(buffer)
+                            .digest("hex").toString();
+                        payload = metadata || {};
+                        payload["file"] = filename;
+                        payload["file_checksum"] = checksum;
+                        payload["digest_algorithm"] = digestAlgorithm || "sha256";
+                        return [4 /*yield*/, signer.sign(payload, signOptions)];
+                    case 1:
+                        jwt = _a.sent();
+                        signatures = new model_1.JSigJWTs();
+                        signatures.addSignature(jwt);
+                        zip = new adm_zip_1.default();
+                        zip.addFile(filename, buffer);
+                        zip.addFile(SIG_FILE, Buffer.from(signatures.toJson()));
+                        return [2 /*return*/, zip.toBuffer()];
+                }
+            });
+        });
     };
     FileJsig.witness = function (jsigFile, signer, signOptions, metadata, digestAlgorithm) {
-        var zip = new adm_zip_1.default(jsigFile);
-        // 1) Get the jwts
-        var sigFileEntry = zip.getEntry(SIG_FILE);
-        if (!sigFileEntry)
-            throw new exceptions_1.VerificationException("Signature file not found!");
-        var signatures = model_1.JSigJWTs.fromJson(sigFileEntry.getData().toString());
-        var jwts = signatures.getSignatures();
-        // 2) Check if there are any signatures
-        if (jwts.size == 0)
-            throw new exceptions_1.VerificationException("No signatures found!");
-        // 3) Get the file
-        // Get the previous one
-        var prevJwtDecoded = jsonwebtoken_1.default.decode(jwts.get(jwts.size - 1));
-        var filename = prevJwtDecoded["file"];
-        var fileEntry = zip.getEntry(filename);
-        if (!fileEntry)
-            throw new exceptions_1.VerificationException("Subject file not found!");
-        var file = fileEntry.getData();
-        // 4) Generate the file checksum
-        var checksum = crypto_1.default.createHash(digestAlgorithm || "sha256")
-            .update(file)
-            .digest("hex").toString();
-        // 5) Create the jwt
-        var payload = metadata || {};
-        payload["file"] = filename;
-        payload["file_checksum"] = checksum;
-        payload["prev_sig_hash"] = signatures.getLastSigHash();
-        payload["digest_algorithm"] = digestAlgorithm || "sha256";
-        //const witnessJwt: string = DIDJwt.sign(payload, jwk, options);
-        var witnessJwt = signer.sign(payload, signOptions);
-        // 6) Add the signature
-        signatures.addSignature(witnessJwt);
-        // 7) Updtate the zip file
-        zip.deleteFile(SIG_FILE);
-        zip.addFile(SIG_FILE, Buffer.from(signatures.toJson()));
-        return zip.toBuffer();
+        return __awaiter(this, void 0, void 0, function () {
+            var zip, sigFileEntry, signatures, jwts, prevJwtDecoded, filename, fileEntry, file, checksum, payload, witnessJwt;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        zip = new adm_zip_1.default(jsigFile);
+                        sigFileEntry = zip.getEntry(SIG_FILE);
+                        if (!sigFileEntry)
+                            throw new exceptions_1.VerificationException("Signature file not found!");
+                        signatures = model_1.JSigJWTs.fromJson(sigFileEntry.getData().toString());
+                        jwts = signatures.getSignatures();
+                        // 2) Check if there are any signatures
+                        if (jwts.size == 0)
+                            throw new exceptions_1.VerificationException("No signatures found!");
+                        prevJwtDecoded = jsonwebtoken_1.default.decode(jwts.get(jwts.size - 1));
+                        filename = prevJwtDecoded["file"];
+                        fileEntry = zip.getEntry(filename);
+                        if (!fileEntry)
+                            throw new exceptions_1.VerificationException("Subject file not found!");
+                        file = fileEntry.getData();
+                        checksum = crypto_1.default.createHash(digestAlgorithm || "sha256")
+                            .update(file)
+                            .digest("hex").toString();
+                        payload = metadata || {};
+                        payload["file"] = filename;
+                        payload["file_checksum"] = checksum;
+                        payload["prev_sig_hash"] = signatures.getLastSigHash();
+                        payload["digest_algorithm"] = digestAlgorithm || "sha256";
+                        return [4 /*yield*/, signer.sign(payload, signOptions)];
+                    case 1:
+                        witnessJwt = _a.sent();
+                        // 6) Add the signature
+                        signatures.addSignature(witnessJwt);
+                        // 7) Updtate the zip file
+                        zip.deleteFile(SIG_FILE);
+                        zip.addFile(SIG_FILE, Buffer.from(signatures.toJson()));
+                        return [2 /*return*/, zip.toBuffer()];
+                }
+            });
+        });
     };
     FileJsig.witnessWithFileUpdate = function (jsigFile, updatedFile, signer, signOptions, metadata, digestAlgorithm) {
-        var zip = new adm_zip_1.default(jsigFile);
-        // 1) Get the jwts
-        var sigFileEntry = zip.getEntry(SIG_FILE);
-        if (!sigFileEntry)
-            throw new exceptions_1.VerificationException("Signature file not found!");
-        var signatures = model_1.JSigJWTs.fromJson(sigFileEntry.getData().toString());
-        var jwts = signatures.getSignatures();
-        // 2) Check if there are any signatures
-        if (jwts.size == 0)
-            throw new exceptions_1.VerificationException("No signatures found!");
-        // 3) Generate checksum from the updated file
-        var checksum = crypto_1.default.createHash(digestAlgorithm || "sha256")
-            .update(updatedFile)
-            .digest("hex").toString();
-        // 3) Create file name with version update
-        var prevJwtDecoded = jsonwebtoken_1.default.decode(jwts.get(jwts.size - 1));
-        var filename = prevJwtDecoded["file"];
-        var updatedFilename;
-        // Check whether the filename has a version in it
-        var filnameHasVersion = FILE_UPDATE_NAME_REGEX.test(filename);
-        if (!filnameHasVersion) {
-            var filenameElements = filename.split(".");
-            updatedFilename = util_1.default.format("%s(sig-update-%d)", filenameElements[0], 1);
-            // 4) Add the file extensions
-            for (var i = 1; i < filenameElements.length; i++) {
-                updatedFilename += "." + filenameElements[i];
-            }
-        }
-        else {
-            var matcher = FILE_UPDATE_NAME_REGEX.exec(filename);
-            var groups = matcher.groups;
-            var prevVersionNumber = groups["verNumber"];
-            var newVersion = util_1.default.format("(sig-update-%d)", Number(prevVersionNumber) + 1);
-            updatedFilename = util_1.default.format("%s%s%s", groups["name"], newVersion, groups["extension"]);
-        }
-        // 5) Create the jwt
-        var payload = metadata || {};
-        payload["file"] = updatedFilename;
-        payload["file_checksum"] = checksum;
-        payload["prev_sig_hash"] = signatures.getLastSigHash();
-        payload["digest_algorithm"] = digestAlgorithm || "sha256";
-        var witnessJwt = signer.sign(payload, signOptions);
-        // 6) Add the signature
-        signatures.addSignature(witnessJwt);
-        // 7) Update the zip
-        zip.addFile(updatedFilename, updatedFile);
-        zip.deleteFile(SIG_FILE);
-        zip.addFile(SIG_FILE, Buffer.from(signatures.toJson()));
-        return zip.toBuffer();
+        return __awaiter(this, void 0, void 0, function () {
+            var zip, sigFileEntry, signatures, jwts, checksum, prevJwtDecoded, filename, updatedFilename, filnameHasVersion, filenameElements, i, matcher, groups, prevVersionNumber, newVersion, payload, witnessJwt;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        zip = new adm_zip_1.default(jsigFile);
+                        sigFileEntry = zip.getEntry(SIG_FILE);
+                        if (!sigFileEntry)
+                            throw new exceptions_1.VerificationException("Signature file not found!");
+                        signatures = model_1.JSigJWTs.fromJson(sigFileEntry.getData().toString());
+                        jwts = signatures.getSignatures();
+                        // 2) Check if there are any signatures
+                        if (jwts.size == 0)
+                            throw new exceptions_1.VerificationException("No signatures found!");
+                        checksum = crypto_1.default.createHash(digestAlgorithm || "sha256")
+                            .update(updatedFile)
+                            .digest("hex").toString();
+                        prevJwtDecoded = jsonwebtoken_1.default.decode(jwts.get(jwts.size - 1));
+                        filename = prevJwtDecoded["file"];
+                        filnameHasVersion = FILE_UPDATE_NAME_REGEX.test(filename);
+                        if (!filnameHasVersion) {
+                            filenameElements = filename.split(".");
+                            updatedFilename = util_1.default.format("%s(sig-update-%d)", filenameElements[0], 1);
+                            // 4) Add the file extensions
+                            for (i = 1; i < filenameElements.length; i++) {
+                                updatedFilename += "." + filenameElements[i];
+                            }
+                        }
+                        else {
+                            matcher = FILE_UPDATE_NAME_REGEX.exec(filename);
+                            groups = matcher.groups;
+                            prevVersionNumber = groups["verNumber"];
+                            newVersion = util_1.default.format("(sig-update-%d)", Number(prevVersionNumber) + 1);
+                            updatedFilename = util_1.default.format("%s%s%s", groups["name"], newVersion, groups["extension"]);
+                        }
+                        payload = metadata || {};
+                        payload["file"] = updatedFilename;
+                        payload["file_checksum"] = checksum;
+                        payload["prev_sig_hash"] = signatures.getLastSigHash();
+                        payload["digest_algorithm"] = digestAlgorithm || "sha256";
+                        return [4 /*yield*/, signer.sign(payload, signOptions)];
+                    case 1:
+                        witnessJwt = _a.sent();
+                        // 6) Add the signature
+                        signatures.addSignature(witnessJwt);
+                        // 7) Update the zip
+                        zip.addFile(updatedFilename, updatedFile);
+                        zip.deleteFile(SIG_FILE);
+                        zip.addFile(SIG_FILE, Buffer.from(signatures.toJson()));
+                        return [2 /*return*/, zip.toBuffer()];
+                }
+            });
+        });
     };
     FileJsig.verify = function (resolver, buffer) {
         return __awaiter(this, void 0, void 0, function () {

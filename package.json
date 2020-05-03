@@ -9,11 +9,9 @@
   },
   "dependencies": {
     "@types/adm-zip": "^0.4.32",
-    "@types/jsonpack": "^1.1.0",
     "@types/node": "^12.12.7",
     "adm-zip": "^0.4.13",
-    "crypto": "^1.0.1",
-    "did-jwt": "git+https://github.com/OnePair/did-jwt.git#7d08c7d3f78d1a7e9e708002ee12fd701bae2387",
+    "did-jwt": "git+https://github.com/OnePair/did-jwt.git#a5b990b86155267594b19833678895b183ddee54",
     "inherits": "^2.0.4",
     "node-did-jwk": "git+https://github.com/OnePair/node-did-jwk.git#4677f0a74e23279f11fffae43b2fd7643041381d",
     "node-jose": "^1.1.3",
