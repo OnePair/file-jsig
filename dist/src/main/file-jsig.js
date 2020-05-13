@@ -181,6 +181,20 @@ var FileJsig = /** @class */ (function () {
             });
         });
     };
+    FileJsig.addSignatureToFile = function (jsigFile, signature) {
+        var zip = new adm_zip_1.default(jsigFile);
+        // 1) Get the jwts
+        var sigFileEntry = zip.getEntry(SIG_FILE);
+        if (!sigFileEntry)
+            throw new exceptions_1.JsigFileFormatException("Signature file not found!");
+        // 2) Add the signature
+        var signatures = model_1.JSigJWTs.fromJson(sigFileEntry.getData().toString());
+        signatures.addSignature(signature);
+        // 3) Updtate the zip file
+        zip.deleteFile(SIG_FILE);
+        zip.addFile(SIG_FILE, Buffer.from(signatures.toJson()));
+        return zip.toBuffer();
+    };
     FileJsig.verify = function (resolver, buffer) {
         return __awaiter(this, void 0, void 0, function () {
             var zip, sigFileEntry, signatures, jwts, jwtIndexes, sigs, jwtIndexKeys, index, jwtIndex, jwt, decodedJwt, issuerDID, filename, fileEntry, file, digestAlgorithm, fileChecksum, verifiedDecodedJwt, prevJwt, prevHash;

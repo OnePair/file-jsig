@@ -4,3 +4,4 @@ function __export(m) {
 }
 Object.defineProperty(exports, "__esModule", { value: true });
 __export(require("./verification-exception"));
+__export(require("./jsig-file-format-exception"));

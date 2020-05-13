@@ -1,6 +1,6 @@
 import { DIDJwt, JwtSigner } from "did-jwt";
 import { Resolver } from "did-resolver";
-import { VerificationException } from "./exceptions";
+import { VerificationException, JsigFileFormatException } from "./exceptions";
 import { JSigJWTs } from "./model";
 
 import AdmZip from "adm-zip";
@@ -193,6 +193,29 @@ export class FileJsig {
 
     // 7) Update the zip
     zip.addFile(updatedFilename, updatedFile);
+    zip.deleteFile(SIG_FILE);
+    zip.addFile(SIG_FILE, Buffer.from(signatures.toJson()));
+
+    return zip.toBuffer();
+  }
+
+  public static addSignatureToFile(jsigFile: Buffer, signature: string): Buffer {
+
+    const zip: AdmZip = new AdmZip(jsigFile);
+
+    // 1) Get the jwts
+    const sigFileEntry: AdmZip.IZipEntry = zip.getEntry(SIG_FILE);
+
+    if (!sigFileEntry)
+      throw new JsigFileFormatException("Signature file not found!");
+
+    // 2) Add the signature
+    const signatures: JSigJWTs =
+      JSigJWTs.fromJson(sigFileEntry.getData().toString());
+
+    signatures.addSignature(signature);
+
+    // 3) Updtate the zip file
     zip.deleteFile(SIG_FILE);
     zip.addFile(SIG_FILE, Buffer.from(signatures.toJson()));
 

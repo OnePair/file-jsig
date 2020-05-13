@@ -12,5 +12,6 @@ export declare class FileJsig {
     static witnessWithFileUpdate(jsigFile: Buffer, updatedFile: Buffer, signer: JwtSigner): Promise<Buffer>;
     static witnessWithFileUpdate(jsigFile: Buffer, updatedFile: Buffer, signer: JwtSigner, signOptions?: JWT.SignOptions): Promise<Buffer>;
     static witnessWithFileUpdate(jsigFile: Buffer, updatedFile: Buffer, signer: JwtSigner, signOptions?: JWT.SignOptions, metadata?: object): Promise<Buffer>;
+    static addSignatureToFile(jsigFile: Buffer, signature: string): Buffer;
     static verify(resolver: Resolver, buffer: Buffer): Promise<object>;
 }
