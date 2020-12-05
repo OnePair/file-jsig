@@ -5,15 +5,15 @@
   "main": "./dist/index.js",
   "scripts": {
     "build": "tsc && tsc --declaration",
-    "test": "mocha -r ts-node/register ./src/test/index.ts"
+    "test": "mocha -r ts-node/register ./src/test/test.ts"
   },
   "dependencies": {
     "@types/adm-zip": "^0.4.32",
     "@types/node": "^12.12.7",
     "adm-zip": "^0.4.13",
-    "did-jwt": "git+https://github.com/OnePair/did-jwt.git#95c7d2f522aaa89158da7b14d022d93ebcf4f127",
+    "did-jwt": "git+https://github.com/OnePair/did-jwt.git#9f2091e7b54493e7576882cbc67cb385d52eeb2e",
     "inherits": "^2.0.4",
-    "node-did-jwk": "git+https://github.com/OnePair/node-did-jwk.git#4677f0a74e23279f11fffae43b2fd7643041381d",
+    "node-did-jwk": "git+https://github.com/OnePair/node-did-jwk.git#c18af431407a8521ddc3f02976e8d9c077f96566",
     "node-jose": "^1.1.3",
     "resolver": "^0.1.12"
   },

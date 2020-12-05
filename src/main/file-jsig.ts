@@ -1,7 +1,7 @@
-import { DIDJwt, JwtSigner } from "did-jwt";
+import { DIDJwt, JwtSigner, VerificationResult } from "did-jwt";
 import { Resolver } from "did-resolver";
 import { VerificationException, JsigFileFormatException } from "./exceptions";
-import { JSigJWTs } from "./model";
+import { JSigJWTs, JsigVerificationResult } from "./model";
 
 import AdmZip from "adm-zip";
 
@@ -11,31 +11,48 @@ import * as JWT from "jsonwebtoken";
 
 const SIG_FILE: string = "signature.jsig";
 
-const FILE_UPDATE_NAME_REGEX: RegExp =
-  new RegExp(/^(?<name>.*)(?<ver>\(sig-update-(?<verNumber>\d)\))(?<extension>.*)$/);
+const FILE_UPDATE_NAME_REGEX: RegExp = new RegExp(
+  /^(?<name>.*)(?<ver>\(sig-update-(?<verNumber>\d)\))(?<extension>.*)$/
+);
 
 export class FileJsig {
-
-  public static async signFile(buffer: Buffer, filename: string, signer: JwtSigner): Promise<Buffer>
-  public static async signFile(buffer: Buffer, filename: string, signer: JwtSigner,
-    signOptions?: JWT.SignOptions): Promise<Buffer>
-  public static async signFile(buffer: Buffer, filename: string, signer: JwtSigner,
-    signOptions?: JWT.SignOptions, metadata?: object): Promise<Buffer>
-  public static async signFile(buffer: Buffer, filename: string, signer: JwtSigner,
-    signOptions?: JWT.SignOptions, metadata?: object,
-    digestAlgorithm?: string): Promise<Buffer> {
-
+  public static async signFile(
+    buffer: Buffer,
+    filename: string,
+    signer: JwtSigner
+  ): Promise<Buffer>;
+  public static async signFile(
+    buffer: Buffer,
+    filename: string,
+    signer: JwtSigner,
+    signOptions?: JWT.SignOptions
+  ): Promise<Buffer>;
+  public static async signFile(
+    buffer: Buffer,
+    filename: string,
+    signer: JwtSigner,
+    signOptions?: JWT.SignOptions,
+    metadata?: object
+  ): Promise<Buffer>;
+  public static async signFile(
+    buffer: Buffer,
+    filename: string,
+    signer: JwtSigner,
+    signOptions?: JWT.SignOptions,
+    metadata?: object,
+    digestAlgorithm?: string
+  ): Promise<Buffer> {
     // 1) Generate the checksum
     const checksum: string = Crypto.createHash(digestAlgorithm || "sha256")
       .update(buffer)
-      .digest("hex").toString();
+      .digest("hex")
+      .toString();
 
     const payload: object = metadata || {};
 
     payload["file"] = filename;
     payload["file_checksum"] = checksum;
     payload["digest_algorithm"] = digestAlgorithm || "sha256";
-
 
     // 2) Create the JWT
     //const jwt: string = DIDJwt.sign(payload, jwk, options);
@@ -52,14 +69,28 @@ export class FileJsig {
     return zip.toBuffer();
   }
 
-  public static async witness(jsigFile: Buffer, signer: JwtSigner): Promise<Buffer>;
-  public static async witness(jsigFile: Buffer, signer: JwtSigner,
-    signOptions?: JWT.SignOptions): Promise<Buffer>;
-  public static witness(jsigFile: Buffer, signer: JwtSigner,
-    signOptions?: JWT.SignOptions, metadata?: object): Promise<Buffer>;
-  public static async witness(jsigFile: Buffer, signer: JwtSigner,
-    signOptions?: JWT.SignOptions, metadata?: object,
-    digestAlgorithm?: string): Promise<Buffer> {
+  public static async witness(
+    jsigFile: Buffer,
+    signer: JwtSigner
+  ): Promise<Buffer>;
+  public static async witness(
+    jsigFile: Buffer,
+    signer: JwtSigner,
+    signOptions?: JWT.SignOptions
+  ): Promise<Buffer>;
+  public static witness(
+    jsigFile: Buffer,
+    signer: JwtSigner,
+    signOptions?: JWT.SignOptions,
+    metadata?: object
+  ): Promise<Buffer>;
+  public static async witness(
+    jsigFile: Buffer,
+    signer: JwtSigner,
+    signOptions?: JWT.SignOptions,
+    metadata?: object,
+    digestAlgorithm?: string
+  ): Promise<Buffer> {
     const zip: AdmZip = new AdmZip(jsigFile);
 
     // 1) Get the jwts
@@ -68,14 +99,14 @@ export class FileJsig {
     if (!sigFileEntry)
       throw new VerificationException("Signature file not found!");
 
-    const signatures: JSigJWTs =
-      JSigJWTs.fromJson(sigFileEntry.getData().toString());
+    const signatures: JSigJWTs = JSigJWTs.fromJson(
+      sigFileEntry.getData().toString()
+    );
 
     const jwts: Map<number, string> = signatures.getSignatures();
 
     // 2) Check if there are any signatures
-    if (jwts.size == 0)
-      throw new VerificationException("No signatures found!");
+    if (jwts.size == 0) throw new VerificationException("No signatures found!");
 
     // 3) Get the file
 
@@ -84,15 +115,15 @@ export class FileJsig {
     const filename: string = prevJwtDecoded["file"];
     const fileEntry: AdmZip.IZipEntry = zip.getEntry(filename);
 
-    if (!fileEntry)
-      throw new VerificationException("Subject file not found!");
+    if (!fileEntry) throw new VerificationException("Subject file not found!");
 
     const file: Buffer = fileEntry.getData();
 
     // 4) Generate the file checksum
     const checksum: string = Crypto.createHash(digestAlgorithm || "sha256")
       .update(file)
-      .digest("hex").toString();
+      .digest("hex")
+      .toString();
 
     // 5) Create the jwt
     const payload: object = metadata || {};
@@ -115,18 +146,32 @@ export class FileJsig {
     return zip.toBuffer();
   }
 
-  public static async witnessWithFileUpdate(jsigFile: Buffer, updatedFile: Buffer,
-    signer: JwtSigner): Promise<Buffer>;
-  public static async witnessWithFileUpdate(jsigFile: Buffer, updatedFile: Buffer,
-    signer: JwtSigner, signOptions?: JWT.SignOptions): Promise<Buffer>;
-  public static async witnessWithFileUpdate(jsigFile: Buffer,
-    updatedFile: Buffer, signer: JwtSigner, signOptions?: JWT.SignOptions,
-    metadata?: object): Promise<Buffer>;
-  public static async witnessWithFileUpdate(jsigFile: Buffer,
-    updatedFile: Buffer, signer: JwtSigner, signOptions?: JWT.SignOptions,
+  public static async witnessWithFileUpdate(
+    jsigFile: Buffer,
+    updatedFile: Buffer,
+    signer: JwtSigner
+  ): Promise<Buffer>;
+  public static async witnessWithFileUpdate(
+    jsigFile: Buffer,
+    updatedFile: Buffer,
+    signer: JwtSigner,
+    signOptions?: JWT.SignOptions
+  ): Promise<Buffer>;
+  public static async witnessWithFileUpdate(
+    jsigFile: Buffer,
+    updatedFile: Buffer,
+    signer: JwtSigner,
+    signOptions?: JWT.SignOptions,
+    metadata?: object
+  ): Promise<Buffer>;
+  public static async witnessWithFileUpdate(
+    jsigFile: Buffer,
+    updatedFile: Buffer,
+    signer: JwtSigner,
+    signOptions?: JWT.SignOptions,
     metadata?: object,
-    digestAlgorithm?: string): Promise<Buffer> {
-
+    digestAlgorithm?: string
+  ): Promise<Buffer> {
     const zip: AdmZip = new AdmZip(jsigFile);
 
     // 1) Get the jwts
@@ -135,19 +180,20 @@ export class FileJsig {
     if (!sigFileEntry)
       throw new VerificationException("Signature file not found!");
 
-    const signatures: JSigJWTs =
-      JSigJWTs.fromJson(sigFileEntry.getData().toString());
+    const signatures: JSigJWTs = JSigJWTs.fromJson(
+      sigFileEntry.getData().toString()
+    );
 
     const jwts: Map<number, string> = signatures.getSignatures();
 
     // 2) Check if there are any signatures
-    if (jwts.size == 0)
-      throw new VerificationException("No signatures found!");
+    if (jwts.size == 0) throw new VerificationException("No signatures found!");
 
     // 3) Generate checksum from the updated file
     const checksum: string = Crypto.createHash(digestAlgorithm || "sha256")
       .update(updatedFile)
-      .digest("hex").toString();
+      .digest("hex")
+      .toString();
 
     // 3) Create file name with version update
     const prevJwtDecoded: any = JWT.decode(jwts.get(jwts.size - 1));
@@ -160,7 +206,11 @@ export class FileJsig {
     if (!filnameHasVersion) {
       const filenameElements: Array<string> = filename.split(".");
 
-      updatedFilename = Util.format("%s(sig-update-%d)", filenameElements[0], 1);
+      updatedFilename = Util.format(
+        "%s(sig-update-%d)",
+        filenameElements[0],
+        1
+      );
 
       // 4) Add the file extensions
       for (let i = 1; i < filenameElements.length; i++) {
@@ -171,11 +221,17 @@ export class FileJsig {
       const groups: object = matcher.groups;
 
       const prevVersionNumber: number = groups["verNumber"];
-      const newVersion = Util.format("(sig-update-%d)",
-        Number(prevVersionNumber) + 1);
+      const newVersion = Util.format(
+        "(sig-update-%d)",
+        Number(prevVersionNumber) + 1
+      );
 
-      updatedFilename = Util.format("%s%s%s", groups["name"], newVersion,
-        groups["extension"]);
+      updatedFilename = Util.format(
+        "%s%s%s",
+        groups["name"],
+        newVersion,
+        groups["extension"]
+      );
     }
 
     // 5) Create the jwt
@@ -199,8 +255,10 @@ export class FileJsig {
     return zip.toBuffer();
   }
 
-  public static addSignatureToFile(jsigFile: Buffer, signature: string): Buffer {
-
+  public static addSignatureToFile(
+    jsigFile: Buffer,
+    signature: string
+  ): Buffer {
     const zip: AdmZip = new AdmZip(jsigFile);
 
     // 1) Get the jwts
@@ -210,8 +268,9 @@ export class FileJsig {
       throw new JsigFileFormatException("Signature file not found!");
 
     // 2) Add the signature
-    const signatures: JSigJWTs =
-      JSigJWTs.fromJson(sigFileEntry.getData().toString());
+    const signatures: JSigJWTs = JSigJWTs.fromJson(
+      sigFileEntry.getData().toString()
+    );
 
     signatures.addSignature(signature);
 
@@ -222,8 +281,10 @@ export class FileJsig {
     return zip.toBuffer();
   }
 
-  public static async verify(resolver: Resolver, buffer: Buffer):
-    Promise<object> {
+  public static async verify(
+    resolver: Resolver,
+    buffer: Buffer
+  ): Promise<JsigVerificationResult> {
     const zip: AdmZip = new AdmZip(buffer);
 
     // 1) Get the jwts
@@ -232,28 +293,27 @@ export class FileJsig {
     if (!sigFileEntry)
       throw new VerificationException("Signature file not found!");
 
-    const signatures: JSigJWTs =
-      JSigJWTs.fromJson(sigFileEntry.getData().toString());
+    const signatures: JSigJWTs = JSigJWTs.fromJson(
+      sigFileEntry.getData().toString()
+    );
     const jwts: Map<number, string> = signatures.getSignatures();
     const jwtIndexes: Array<number> = Array.from(jwts.keys());
 
     // 2) Check if there are any signatures
-    if (jwts.size == 0)
-      throw new VerificationException("No signatures found!");
+    if (jwts.size == 0) throw new VerificationException("No signatures found!");
 
-    const sigs: Map<number, string> = new Map<number, string>();
+    const sigs: Map<number, VerificationResult> = new Map<number, VerificationResult>();
     //const sigs: object = {};
 
     // Verify the signatures
     const jwtIndexKeys: Array<number> = Array.from(jwts.keys());
 
     for (let index = 0; index < jwtIndexKeys.length; index++) {
-
       const jwtIndex: number = jwtIndexes[index];
 
       const jwt: string = jwts.get(jwtIndex);
       const decodedJwt: any = JWT.decode(jwt);
-      let issuerDID: string = decodedJwt["iss"];
+      //let issuerDID: string = decodedJwt["iss"];
 
       // 1) Generate the file checksum
       const filename: string = decodedJwt["file"];
@@ -266,18 +326,25 @@ export class FileJsig {
 
       const digestAlgorithm: string = decodedJwt["digest_algorithm"];
 
-      const fileChecksum: string = Crypto.createHash(digestAlgorithm || "sha256")
+      const fileChecksum: string = Crypto.createHash(
+        digestAlgorithm || "sha256"
+      )
         .update(file)
-        .digest("hex").toString();
+        .digest("hex")
+        .toString();
 
       // 2) Verify the jwt
-      const verifiedDecodedJwt: object =
-        await DIDJwt.verify(resolver, jwt, issuerDID);
+      const verificationResult: VerificationResult = await DIDJwt.verify(
+        resolver,
+        jwt
+      );
+      const verifiedPayload: object = verificationResult.payload;
 
       // 3) Verify the checksum
-      if (fileChecksum != verifiedDecodedJwt["file_checksum"])
-        throw new VerificationException("The file checksum found in the" +
-          " signature is incorrect!");
+      if (fileChecksum != verifiedPayload["file_checksum"])
+        throw new VerificationException(
+          "The file checksum found in the" + " signature is incorrect!"
+        );
 
       // 4) Verify the prev hash
 
@@ -287,15 +354,17 @@ export class FileJsig {
 
         const prevHash: string = Crypto.createHash("sha256")
           .update(Buffer.from(prevJwt))
-          .digest("hex").toString();
+          .digest("hex")
+          .toString();
 
-        if (prevHash != verifiedDecodedJwt["prev_sig_hash"])
-          throw new VerificationException("The previous signature hash " +
-            "found in the signature is incorrect!");
+        if (prevHash != verifiedPayload["prev_sig_hash"])
+          throw new VerificationException(
+            "The previous signature hash " +
+              "found in the signature is incorrect!"
+          );
       }
-      sigs.set(jwtIndex, jwt);
+      sigs.set(jwtIndex, verificationResult);
     }
-    return { "signatures": sigs };
-
+    return { signatures: sigs };
   }
 }
