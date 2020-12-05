@@ -13,6 +13,7 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.VerificationException = void 0;
 var VerificationException = /** @class */ (function (_super) {
     __extends(VerificationException, _super);
     function VerificationException(message) {

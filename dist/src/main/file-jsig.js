@@ -1,4 +1,23 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -38,14 +57,8 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
-    result["default"] = mod;
-    return result;
-};
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.FileJsig = void 0;
 var did_jwt_1 = require("did-jwt");
 var exceptions_1 = require("./exceptions");
 var model_1 = require("./model");
@@ -66,7 +79,8 @@ var FileJsig = /** @class */ (function () {
                     case 0:
                         checksum = Crypto.createHash(digestAlgorithm || "sha256")
                             .update(buffer)
-                            .digest("hex").toString();
+                            .digest("hex")
+                            .toString();
                         payload = metadata || {};
                         payload["file"] = filename;
                         payload["file_checksum"] = checksum;
@@ -107,7 +121,8 @@ var FileJsig = /** @class */ (function () {
                         file = fileEntry.getData();
                         checksum = Crypto.createHash(digestAlgorithm || "sha256")
                             .update(file)
-                            .digest("hex").toString();
+                            .digest("hex")
+                            .toString();
                         payload = metadata || {};
                         payload["file"] = filename;
                         payload["file_checksum"] = checksum;
@@ -143,7 +158,8 @@ var FileJsig = /** @class */ (function () {
                             throw new exceptions_1.VerificationException("No signatures found!");
                         checksum = Crypto.createHash(digestAlgorithm || "sha256")
                             .update(updatedFile)
-                            .digest("hex").toString();
+                            .digest("hex")
+                            .toString();
                         prevJwtDecoded = JWT.decode(jwts.get(jwts.size - 1));
                         filename = prevJwtDecoded["file"];
                         filnameHasVersion = FILE_UPDATE_NAME_REGEX.test(filename);
@@ -197,7 +213,7 @@ var FileJsig = /** @class */ (function () {
     };
     FileJsig.verify = function (resolver, buffer) {
         return __awaiter(this, void 0, void 0, function () {
-            var zip, sigFileEntry, signatures, jwts, jwtIndexes, sigs, jwtIndexKeys, index, jwtIndex, jwt, decodedJwt, issuerDID, filename, fileEntry, file, digestAlgorithm, fileChecksum, verifiedDecodedJwt, prevJwt, prevHash;
+            var zip, sigFileEntry, signatures, jwts, jwtIndexes, sigs, jwtIndexKeys, index, jwtIndex, jwt, decodedJwt, filename, fileEntry, file, digestAlgorithm, fileChecksum, verificationResult, verifiedPayload, prevJwt, prevHash;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -220,7 +236,6 @@ var FileJsig = /** @class */ (function () {
                         jwtIndex = jwtIndexes[index];
                         jwt = jwts.get(jwtIndex);
                         decodedJwt = JWT.decode(jwt);
-                        issuerDID = decodedJwt["iss"];
                         filename = decodedJwt["file"];
                         fileEntry = zip.getEntry(filename);
                         if (!fileEntry)
@@ -229,31 +244,33 @@ var FileJsig = /** @class */ (function () {
                         digestAlgorithm = decodedJwt["digest_algorithm"];
                         fileChecksum = Crypto.createHash(digestAlgorithm || "sha256")
                             .update(file)
-                            .digest("hex").toString();
-                        return [4 /*yield*/, did_jwt_1.DIDJwt.verify(resolver, jwt, issuerDID)];
+                            .digest("hex")
+                            .toString();
+                        return [4 /*yield*/, did_jwt_1.DIDJwt.verify(resolver, jwt)];
                     case 2:
-                        verifiedDecodedJwt = _a.sent();
+                        verificationResult = _a.sent();
+                        verifiedPayload = verificationResult.payload;
                         // 3) Verify the checksum
-                        if (fileChecksum != verifiedDecodedJwt["file_checksum"])
-                            throw new exceptions_1.VerificationException("The file checksum found in the" +
-                                " signature is incorrect!");
+                        if (fileChecksum != verifiedPayload["file_checksum"])
+                            throw new exceptions_1.VerificationException("The file checksum found in the" + " signature is incorrect!");
                         // 4) Verify the prev hash
                         // Get the prev hash
                         if (jwtIndex != 0) {
                             prevJwt = jwts.get(jwtIndex - 1);
                             prevHash = Crypto.createHash("sha256")
                                 .update(Buffer.from(prevJwt))
-                                .digest("hex").toString();
-                            if (prevHash != verifiedDecodedJwt["prev_sig_hash"])
+                                .digest("hex")
+                                .toString();
+                            if (prevHash != verifiedPayload["prev_sig_hash"])
                                 throw new exceptions_1.VerificationException("The previous signature hash " +
                                     "found in the signature is incorrect!");
                         }
-                        sigs.set(jwtIndex, jwt);
+                        sigs.set(jwtIndex, verificationResult);
                         _a.label = 3;
                     case 3:
                         index++;
                         return [3 /*break*/, 1];
-                    case 4: return [2 /*return*/, { "signatures": sigs }];
+                    case 4: return [2 /*return*/, { signatures: sigs }];
                 }
             });
         });

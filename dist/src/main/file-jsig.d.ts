@@ -1,6 +1,7 @@
 /// <reference types="node" />
 import { JwtSigner } from "did-jwt";
 import { Resolver } from "did-resolver";
+import { JsigVerificationResult } from "./model";
 import * as JWT from "jsonwebtoken";
 export declare class FileJsig {
     static signFile(buffer: Buffer, filename: string, signer: JwtSigner): Promise<Buffer>;
@@ -13,5 +14,5 @@ export declare class FileJsig {
     static witnessWithFileUpdate(jsigFile: Buffer, updatedFile: Buffer, signer: JwtSigner, signOptions?: JWT.SignOptions): Promise<Buffer>;
     static witnessWithFileUpdate(jsigFile: Buffer, updatedFile: Buffer, signer: JwtSigner, signOptions?: JWT.SignOptions, metadata?: object): Promise<Buffer>;
     static addSignatureToFile(jsigFile: Buffer, signature: string): Buffer;
-    static verify(resolver: Resolver, buffer: Buffer): Promise<object>;
+    static verify(resolver: Resolver, buffer: Buffer): Promise<JsigVerificationResult>;
 }
