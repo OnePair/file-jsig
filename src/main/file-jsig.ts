@@ -5,6 +5,8 @@ import { JSigJWTs, JsigVerificationResult } from "./model";
 
 import AdmZip from "adm-zip";
 
+import { pki } from "node-forge";
+
 import * as Util from "util";
 import * as Crypto from "crypto";
 import * as JWT from "jsonwebtoken";
@@ -284,6 +286,11 @@ export class FileJsig {
   public static async verify(
     resolver: Resolver,
     buffer: Buffer
+  ): Promise<JsigVerificationResult>;
+  public static async verify(
+    resolver: Resolver,
+    buffer: Buffer,
+    caStore?: pki.CAStore
   ): Promise<JsigVerificationResult> {
     const zip: AdmZip = new AdmZip(buffer);
 
@@ -302,7 +309,10 @@ export class FileJsig {
     // 2) Check if there are any signatures
     if (jwts.size == 0) throw new VerificationException("No signatures found!");
 
-    const sigs: Map<number, VerificationResult> = new Map<number, VerificationResult>();
+    const sigs: Map<number, VerificationResult> = new Map<
+      number,
+      VerificationResult
+    >();
     //const sigs: object = {};
 
     // Verify the signatures
@@ -336,7 +346,8 @@ export class FileJsig {
       // 2) Verify the jwt
       const verificationResult: VerificationResult = await DIDJwt.verify(
         resolver,
-        jwt
+        jwt,
+        caStore
       );
       const verifiedPayload: object = verificationResult.payload;
 

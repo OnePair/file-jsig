@@ -211,7 +211,7 @@ var FileJsig = /** @class */ (function () {
         zip.addFile(SIG_FILE, Buffer.from(signatures.toJson()));
         return zip.toBuffer();
     };
-    FileJsig.verify = function (resolver, buffer) {
+    FileJsig.verify = function (resolver, buffer, caStore) {
         return __awaiter(this, void 0, void 0, function () {
             var zip, sigFileEntry, signatures, jwts, jwtIndexes, sigs, jwtIndexKeys, index, jwtIndex, jwt, decodedJwt, filename, fileEntry, file, digestAlgorithm, fileChecksum, verificationResult, verifiedPayload, prevJwt, prevHash;
             return __generator(this, function (_a) {
@@ -246,7 +246,7 @@ var FileJsig = /** @class */ (function () {
                             .update(file)
                             .digest("hex")
                             .toString();
-                        return [4 /*yield*/, did_jwt_1.DIDJwt.verify(resolver, jwt)];
+                        return [4 /*yield*/, did_jwt_1.DIDJwt.verify(resolver, jwt, caStore)];
                     case 2:
                         verificationResult = _a.sent();
                         verifiedPayload = verificationResult.payload;
